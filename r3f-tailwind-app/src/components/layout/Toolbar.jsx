@@ -157,7 +157,7 @@ export default function Toolbar() {
 
       <div className="w-px h-5 bg-black/10 shrink-0 mx-2" />
       
-      {/* Room Actions */}
+      /* {/* Room Actions */}
       <div className="flex items-center gap-1 h-full shrink-0">
         <motion.button
           whileHover={{ scale: 1.05 }}
@@ -169,7 +169,7 @@ export default function Toolbar() {
           <span className="text-sm leading-none">🔄</span>
           <span className="hidden lg:block">Reset</span>
         </motion.button>
-      </div>
+      </div> */
     </motion.div>
   );
 }
