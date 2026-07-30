@@ -158,18 +158,7 @@ export default function Toolbar() {
       <div className="w-px h-5 bg-black/10 shrink-0 mx-2" />
       
       /* {/* Room Actions */}
-      <div className="flex items-center gap-1 h-full shrink-0">
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="flex items-center justify-center gap-1.5 px-3 h-8 rounded-xl transition-colors bg-rose-50 text-rose-600 hover:bg-rose-100 cursor-pointer shadow-sm border border-rose-100 font-semibold text-xs"
-          onClick={resetRoom}
-          title="Reset Room to Template Default"
-        >
-          <span className="text-sm leading-none">🔄</span>
-          <span className="hidden lg:block">Reset</span>
-        </motion.button>
-      </div> */
+      
     </motion.div>
   );
 }
