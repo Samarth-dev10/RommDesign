@@ -157,7 +157,7 @@ export default function Toolbar() {
 
       <div className="w-px h-5 bg-black/10 shrink-0 mx-2" />
       
-      /* {/* Room Actions */}
+       {/* Room Actions */}
       
     </motion.div>
   );
