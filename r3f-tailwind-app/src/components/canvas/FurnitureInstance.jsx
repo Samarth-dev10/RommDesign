@@ -12,6 +12,19 @@ import useStore from '../../store/useStore';
 import { getFurnitureById } from '../../data/furnitureRegistry';
 
 export default function FurnitureInstance({ item }) {
+  const definition = useMemo(
+    () => getFurnitureById(item.catalogItemId ?? item.registryId),
+    [item.catalogItemId, item.registryId],
+  );
+
+  // Keep invalid or legacy catalog entries out of the loader. Passing an empty
+  // URL to GLTFLoader makes Vite return index.html, which then fails as JSON.
+  if (!definition?.modelPath) return null;
+
+  return <LoadedFurnitureInstance item={item} definition={definition} />;
+}
+
+function LoadedFurnitureInstance({ item, definition }) {
   const ref = useRef();
   const [hovered, setHovered] = useState(false);
 
@@ -19,10 +32,8 @@ export default function FurnitureInstance({ item }) {
   const selectFurniture = useStore((s) => s.selectFurniture);
 
   const isSelected = selectedIds.includes(item.id);
-  const definition = useMemo(() => getFurnitureById(item.catalogItemId), [item.catalogItemId]);
 
-  // Load GLB model
-  const { scene } = useGLTF(definition?.modelPath || '');
+  const { scene } = useGLTF(definition.modelPath);
 
   const clonedScene = useMemo(() => {
     const clone = scene.clone(true);
