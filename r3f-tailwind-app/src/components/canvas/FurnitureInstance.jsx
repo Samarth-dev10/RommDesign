@@ -54,7 +54,10 @@ function LoadedFurnitureInstance({ item, definition }) {
     if (!clonedScene) return;
     clonedScene.traverse((child) => {
       if (child.isMesh && child.material) {
-        if (isSelected) {
+        if (item.isColliding) {
+          child.material.emissive = new THREE.Color('#ef4444');
+          child.material.emissiveIntensity = 0.75;
+        } else if (isSelected) {
           child.material.emissive = new THREE.Color('#6366f1');
           child.material.emissiveIntensity = 0.15;
         } else if (hovered) {
@@ -66,7 +69,7 @@ function LoadedFurnitureInstance({ item, definition }) {
         }
       }
     });
-  }, [clonedScene, isSelected, hovered]);
+  }, [clonedScene, isSelected, hovered, item.isColliding]);
 
   const { gl } = useThree();
 
@@ -81,6 +84,7 @@ function LoadedFurnitureInstance({ item, definition }) {
   return (
     <group
       ref={ref}
+      userData={{ furnitureId: item.id }}
       position={item.position}
       rotation={item.rotation}
       scale={item.scale}

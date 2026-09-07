@@ -151,6 +151,19 @@ const useStore = create((set, get) => ({
     }));
   },
 
+  setCollisionStates: (collisionIds) => {
+    set((state) => {
+      const nextIds = new Set(collisionIds);
+      let changed = false;
+      const furniture = state.furniture.map((item) => {
+        const isColliding = nextIds.has(item.id);
+        if (item.isColliding !== isColliding) changed = true;
+        return item.isColliding === isColliding ? item : { ...item, isColliding };
+      });
+      return changed ? { furniture } : state;
+    });
+  },
+
   /** Update furniture and push to history (for completed transforms). */
   updateFurnitureWithHistory: (id, updates) => {
     get()._pushHistory();

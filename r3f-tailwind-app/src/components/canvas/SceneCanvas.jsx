@@ -9,6 +9,7 @@ import { Canvas } from '@react-three/fiber';
 import { ContactShadows } from '@react-three/drei';
 import Room from './Room';
 import FurnitureManager from './FurnitureManager';
+import CollisionAdvisoryEngine from './CollisionAdvisoryEngine';
 import SceneControls from './SceneControls';
 import SceneLighting from './SceneLighting';
 import CameraManager from './CameraManager';
@@ -70,6 +71,7 @@ export default function SceneCanvas() {
         <SceneLighting />
         <Room />
         <FurnitureManager />
+        <CollisionAdvisoryEngine />
         <Grid />
         <MeasurementOverlay />
         <DeselectPlane />
