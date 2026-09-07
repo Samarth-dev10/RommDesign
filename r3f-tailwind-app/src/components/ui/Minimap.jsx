@@ -57,7 +57,7 @@ export default function Minimap() {
 
     // Furniture dots
     furniture.forEach((item) => {
-      if (item.visible === false) return;
+      if (item.isVisible === false) return;
       const x = offsetX + item.position[0] * scale;
       const y = offsetY + item.position[2] * scale;
       const isSelected = selectedIds.includes(item.id);

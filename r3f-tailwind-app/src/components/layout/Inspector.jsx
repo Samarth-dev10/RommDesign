@@ -27,7 +27,7 @@ export default function Inspector() {
       : null;
 
   const definition = selectedItem
-    ? getFurnitureById(selectedItem.registryId)
+    ? getFurnitureById(selectedItem.catalogItemId)
     : null;
 
   const handleScaleSliderChange = useCallback(
@@ -43,7 +43,7 @@ export default function Inspector() {
 
   const handleToggleLock = useCallback(() => {
     if (!selectedItem) return;
-    updateFurniture(selectedItem.id, { locked: !selectedItem.locked });
+    updateFurniture(selectedItem.id, { isLocked: !selectedItem.isLocked });
   }, [selectedItem, updateFurniture]);
 
   const handleDelete = useCallback(() => {
@@ -245,11 +245,11 @@ export default function Inspector() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-200 shadow-sm ${selectedItem.locked ? 'bg-indigo-50 text-indigo-600 border border-indigo-200' : 'bg-white text-slate-400 border border-slate-200 hover:text-slate-600 hover:bg-slate-50'}`}
+              className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-200 shadow-sm ${selectedItem.isLocked ? 'bg-indigo-50 text-indigo-600 border border-indigo-200' : 'bg-white text-slate-400 border border-slate-200 hover:text-slate-600 hover:bg-slate-50'}`}
               onClick={handleToggleLock}
-              title={selectedItem.locked ? 'Unlock' : 'Lock'}
+              title={selectedItem.isLocked ? 'Unlock' : 'Lock'}
             >
-              {selectedItem.locked ? '🔒' : '🔓'}
+              {selectedItem.isLocked ? '🔒' : '🔓'}
             </motion.button>
           </div>
           

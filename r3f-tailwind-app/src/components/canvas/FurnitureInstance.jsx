@@ -19,7 +19,7 @@ export default function FurnitureInstance({ item }) {
   const selectFurniture = useStore((s) => s.selectFurniture);
 
   const isSelected = selectedIds.includes(item.id);
-  const definition = useMemo(() => getFurnitureById(item.registryId), [item.registryId]);
+  const definition = useMemo(() => getFurnitureById(item.catalogItemId), [item.catalogItemId]);
 
   // Load GLB model
   const { scene } = useGLTF(definition?.modelPath || '');
@@ -60,7 +60,7 @@ export default function FurnitureInstance({ item }) {
   const { gl } = useThree();
 
   const handlePointerDown = (e) => {
-    if (item.locked) return;
+    if (item.isLocked) return;
     e.stopPropagation();
     selectFurniture(item.id, e.shiftKey);
   };

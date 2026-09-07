@@ -9,6 +9,7 @@ import { generateId } from '../utils/idUtils';
 import { getFurnitureById } from '../data/furnitureRegistry';
 import { instantiateTemplate } from '../data/roomTemplates';
 import { MAX_HISTORY_SIZE } from '../constants';
+import { cloneFurnitureState } from '../utils/coordinateTransformers';
 
 const DEFAULT_TEMPLATE = 'modern-living-room';
 
@@ -21,6 +22,7 @@ function createInitialState() {
     windows: template.windows,
     doors: template.doors,
     furniture: template.furniture,
+    lastSavedState: cloneFurnitureState(template.furniture),
 
     // ── Selection ────────────────────────────────
     selectedIds: [],
@@ -88,6 +90,7 @@ const useStore = create((set, get) => ({
       doors: template.doors,
       furniture: template.furniture,
       lightPreset: template.lightPreset || 'day',
+      lastSavedState: cloneFurnitureState(template.furniture),
       selectedIds: [],
       history: [],
       future: [],
@@ -105,12 +108,13 @@ const useStore = create((set, get) => ({
 
     const newItem = {
       id: generateId(),
-      registryId,
+      catalogItemId: registryId,
       position: [...position],
       rotation: [...definition.defaultRotation],
       scale: [...definition.defaultScale],
-      locked: false,
-      visible: true,
+      isLocked: false,
+      isVisible: true,
+      isColliding: false,
     };
 
     // Apply snapHeight
@@ -307,6 +311,18 @@ const useStore = create((set, get) => ({
 
   setSaveStatus: (status) => set({ saveStatus: status }),
 
+  markFurnitureSaved: () =>
+    set((state) => ({ lastSavedState: cloneFurnitureState(state.furniture) })),
+
+  revertSceneObjects: () =>
+    set((state) => ({
+      furniture: cloneFurnitureState(state.lastSavedState),
+      selectedIds: [],
+      history: [],
+      future: [],
+      saveStatus: 'error',
+    })),
+
   exportRoom: () => {
     const { currentTemplate, room, windows, doors, furniture, lightPreset } =
       get();
@@ -329,7 +345,14 @@ const useStore = create((set, get) => ({
       room: data.room,
       windows: data.windows || [],
       doors: data.doors || [],
-      furniture: data.furniture,
+      furniture: data.furniture.map((item) => ({
+        ...item,
+        catalogItemId: item.catalogItemId ?? item.registryId,
+        isLocked: item.isLocked ?? item.locked ?? false,
+        isVisible: item.isVisible ?? item.visible ?? true,
+        isColliding: false,
+      })),
+      lastSavedState: cloneFurnitureState(data.furniture),
       lightPreset: data.lightPreset || 'day',
       selectedIds: [],
       history: [],
