@@ -10,6 +10,8 @@ import { OrbitControls, TransformControls } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import useStore from '../../store/useStore';
+import { getFurnitureById } from '../../data/furnitureRegistry';
+import { applySnapping, clampToRoomFootprint } from '../../utils/snapUtils';
 
 export default function SceneControls() {
   const orbitRef = useRef();
@@ -71,26 +73,44 @@ export default function SceneControls() {
 
   // Live-update store while gizmo is being dragged (with boundary clamping)
   const room = useStore((s) => s.room);
+  const selectedDefinition = selectedItem
+    ? getFurnitureById(selectedItem.catalogItemId ?? selectedItem.registryId)
+    : null;
+
+  const constrainTarget = (obj) => {
+    const snapHeight = selectedDefinition?.snapHeight ?? 0;
+    const position = applySnapping(
+      [obj.position.x, obj.position.y, obj.position.z],
+      {
+        snapEnabled,
+        gridSize,
+        snapHeight,
+        roomWidth: room.width,
+        roomDepth: room.depth,
+      },
+    );
+    const halfExtent = selectedItem?.bounds?.halfExtent ?? [0.5, 0, 0.5];
+    const boundedPosition = clampToRoomFootprint(
+      position,
+      room.width,
+      room.depth,
+      [halfExtent[0] * Math.abs(obj.scale.x), 0, halfExtent[2] * Math.abs(obj.scale.z)],
+    );
+    obj.position.set(...boundedPosition);
+
+    // Furniture spins on the floor around its Y axis only.
+    obj.rotation.x = 0;
+    obj.rotation.z = 0;
+  };
 
   useEffect(() => {
     const controls = transformRef.current;
     if (!controls) return;
 
-    const clampToRoom = (obj) => {
-      const hw = room.width / 2 - 0.1;
-      const hd = room.depth / 2 - 0.1;
-      obj.position.x = Math.max(-hw, Math.min(hw, obj.position.x));
-      obj.position.z = Math.max(-hd, Math.min(hd, obj.position.z));
-      if (obj.position.y < 0) obj.position.y = 0;
-      if (obj.position.y > room.height) obj.position.y = room.height;
-    };
-
     const onChange = () => {
       if (!selectedItem) return;
       const obj = targetRef.current;
-      if (transformMode === 'translate') {
-        clampToRoom(obj);
-      }
+      constrainTarget(obj);
       updateFurniture(selectedItem.id, {
         position: [obj.position.x, obj.position.y, obj.position.z],
         rotation: [obj.rotation.x, obj.rotation.y, obj.rotation.z],
@@ -101,9 +121,7 @@ export default function SceneControls() {
     const onMouseUp = () => {
       if (!selectedItem) return;
       const obj = targetRef.current;
-      if (transformMode === 'translate') {
-        clampToRoom(obj);
-      }
+      constrainTarget(targetRef.current);
       updateFurnitureWithHistory(selectedItem.id, {
         position: [obj.position.x, obj.position.y, obj.position.z],
         rotation: [obj.rotation.x, obj.rotation.y, obj.rotation.z],
@@ -117,7 +135,7 @@ export default function SceneControls() {
       controls.removeEventListener('change', onChange);
       controls.removeEventListener('mouseUp', onMouseUp);
     };
-  }, [selectedItem, updateFurniture, updateFurnitureWithHistory, room, transformMode]);
+  }, [selectedItem, updateFurniture, updateFurnitureWithHistory, room, transformMode, snapEnabled, gridSize, selectedDefinition]);
 
   // Compute snap values
   const translationSnap = snapEnabled ? gridSize : null;

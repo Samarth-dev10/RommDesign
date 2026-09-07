@@ -1,7 +1,7 @@
 /**
  * Keyboard Shortcuts Hook — handles all global keyboard interactions.
  *
- * W = Translate, E = Rotate, R = Scale
+ * W = Translate, E/R = Rotate, S = Scale
  * Delete = Remove, Ctrl+D = Duplicate, Ctrl+C = Copy, Ctrl+V = Paste
  * Ctrl+Z = Undo, Ctrl+Y = Redo, Ctrl+A = Select All
  */
@@ -75,6 +75,9 @@ export default function useKeyboardShortcuts() {
           setTransformMode('rotate');
           break;
         case 'r':
+          setTransformMode('rotate');
+          break;
+        case 's':
           setTransformMode('scale');
           break;
         case 'delete':
