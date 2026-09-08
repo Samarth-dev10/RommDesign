@@ -7,21 +7,22 @@
 import React, { useMemo } from 'react';
 import * as THREE from 'three';
 import useStore from '../../store/useStore';
+import { FLOORING_MATERIALS, LIGHT_PRESETS, WALL_MATERIALS } from '../../constants';
 
 /** Create a wall mesh. */
-function Wall({ position, size, color, rotation = [0, 0, 0] }) {
+function Wall({ position, size, color, rotation = [0, 0, 0], material = {} }) {
   return (
     <mesh
       position={position}
       rotation={rotation}
-      receiveShadow
-      castShadow
+
     >
       <boxGeometry args={size} />
       <meshStandardMaterial
         color={color}
-        roughness={0.8}
-        metalness={0.05}
+        roughness={material.roughness ?? 0.72}
+        metalness={material.metalness ?? 0.04}
+        envMapIntensity={0.24}
       />
     </mesh>
   );
@@ -33,25 +34,34 @@ function WindowPanel({ position, size, thickness, rotation = [0, 0, 0] }) {
   return (
     <group position={position} rotation={rotation}>
       {/* Window frame */}
-      <mesh castShadow receiveShadow>
+      <mesh >
         <boxGeometry args={[size[0] + 0.08, size[1] + 0.08, depth]} />
         <meshStandardMaterial color="#333333" roughness={0.3} metalness={0.6} />
       </mesh>
-      {/* Blackout background to hide wall interior */}
+      {/* Exterior reveal keeps the glazing from reading as a black placeholder. */}
       <mesh position={[0, 0, -0.01]}>
         <planeGeometry args={[size[0], size[1]]} />
-        <meshBasicMaterial color="#000000" />
+        <meshStandardMaterial color="#707b82" roughness={0.86} metalness={0.02} />
       </mesh>
-      {/* Glass pane */}
+      {/* Glass catches the environment while remaining visually quiet. */}
       <mesh position={[0, 0, 0.01]}>
-        <boxGeometry args={[size[0], size[1], 0.01]} />
+        <boxGeometry args={[size[0], size[1], 0.018]} />
         <meshPhysicalMaterial
-          color="#aaddff"
+          color="#c8d8dc"
           transparent
-          opacity={0.4}
-          roughness={0.1}
-          metalness={0.1}
+          opacity={0.28}
+          transmission={0.72}
+          thickness={0.02}
+          ior={1.46}
+          roughness={0.08}
+          metalness={0.02}
+          envMapIntensity={0.9}
         />
+      </mesh>
+      {/* Soft interior light portal makes each window affect the room. */}
+      <mesh position={[0, 0, 0.035]}>
+        <planeGeometry args={[Math.max(size[0] - 0.08, 0.1), Math.max(size[1] - 0.08, 0.1)]} />
+        <meshBasicMaterial color="#f5d7ad" transparent opacity={0.08} />
       </mesh>
       {/* Cross bars */}
       <mesh position={[0, 0, 0.02]}>
@@ -72,12 +82,12 @@ function DoorPanel({ position, size, thickness, rotation = [0, 0, 0] }) {
   return (
     <group position={position} rotation={rotation}>
       {/* Door frame */}
-      <mesh castShadow receiveShadow>
+      <mesh >
         <boxGeometry args={[size[0] + 0.1, size[1] + 0.05, depth]} />
         <meshStandardMaterial color="#222222" roughness={0.4} metalness={0.2} />
       </mesh>
       {/* Door panel itself (simulated slightly open or just a solid block) */}
-      <mesh position={[0, 0, 0.01]} castShadow receiveShadow>
+      <mesh position={[0, 0, 0.01]} >
         <boxGeometry args={[size[0], size[1], depth - 0.02]} />
         <meshStandardMaterial color="#4a3b2c" roughness={0.7} />
       </mesh>
@@ -94,8 +104,12 @@ export default function Room() {
   const room = useStore((s) => s.room);
   const windows = useStore((s) => s.windows);
   const doors = useStore((s) => s.doors);
+  const lightPreset = useStore((s) => s.lightPreset);
 
   const { width, depth, height, wallColor, floorColor, ceilingColor, wallThickness } = room;
+  const floorMaterial = FLOORING_MATERIALS[room.floorMaterial] || FLOORING_MATERIALS.oakNatural;
+  const wallMaterial = WALL_MATERIALS[room.wallMaterial] || WALL_MATERIALS.warmPaint;
+  const fixtureIntensity = (LIGHT_PRESETS[lightPreset] || LIGHT_PRESETS.midday).directional.intensity > 1 ? 0.46 : 0.24;
   const hw = width / 2;
   const hd = depth / 2;
   const hh = height / 2;
@@ -213,13 +227,16 @@ export default function Room() {
       <mesh
         rotation={[-Math.PI / 2, 0, 0]}
         position={[0, 0, 0]}
-        receiveShadow
+
       >
         <planeGeometry args={[width, depth]} />
         <meshStandardMaterial
-          color={floorColor}
-          roughness={0.7}
-          metalness={0.05}
+          color={floorMaterial.color || floorColor}
+          roughness={floorMaterial.roughness}
+          metalness={floorMaterial.metalness}
+          envMapIntensity={floorMaterial.pattern === 'tile' ? 0.72 : 0.48}
+          clearcoat={floorMaterial.pattern === 'tile' ? 0.28 : 0.12}
+          clearcoatRoughness={0.42}
           side={THREE.DoubleSide}
         />
       </mesh>
@@ -229,38 +246,68 @@ export default function Room() {
         <planeGeometry args={[width, depth]} />
         <meshStandardMaterial color={ceilingColor} roughness={0.85} side={THREE.DoubleSide} />
       </mesh>
+      <group position={[0, height - 0.025, 0]}>
+        {[-0.32, 0, 0.32].map((x) => (
+          <mesh key={`ceiling-fixture-${x}`} position={[x * width, 0, -depth * 0.14]} rotation={[Math.PI / 2, 0, 0]}>
+            <circleGeometry args={[0.055, 24]} />
+            <meshStandardMaterial
+              color="#fff2d2"
+              emissive="#f0b978"
+              emissiveIntensity={fixtureIntensity}
+              roughness={0.35}
+              metalness={0.08}
+            />
+          </mesh>
+        ))}
+      </group>
+
+      {/* Recessed ceiling cove gives the room a finished architectural edge. */}
+      <mesh position={[0, height - 0.055, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[width - 0.16, depth - 0.16]} />
+        <meshStandardMaterial color={ceilingColor} roughness={0.72} metalness={0.02} />
+      </mesh>
 
       {/* Back Wall (Z-) */}
       <Wall
         position={[0, hh, -hd - t / 2]}
         size={[width + t * 2, height, t]}
-        color={wallColor}
+        color={wallMaterial.color || wallColor}
+        material={wallMaterial}
       />
 
       {/* Front Wall (Z+) */}
       <Wall
         position={[0, hh, hd + t / 2]}
         size={[width + t * 2, height, t]}
-        color={wallColor}
+        color={wallMaterial.color || wallColor}
+        material={wallMaterial}
       />
 
       {/* Left Wall (X-) */}
       <Wall
         position={[-hw - t / 2, hh, 0]}
         size={[t, height, depth]}
-        color={wallColor}
+        color={wallMaterial.color || wallColor}
+        material={wallMaterial}
       />
 
       {/* Right Wall (X+) */}
       <Wall
         position={[hw + t / 2, hh, 0]}
         size={[t, height, depth]}
-        color={wallColor}
+        color={wallMaterial.color || wallColor}
+        material={wallMaterial}
       />
 
       {/* Windows and Doors */}
       {windowMeshes}
       {doorMeshes}
+
+      {/* Soft recessed floor inset adds a subtle junction shadow. */}
+      <mesh position={[0, 0.018, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+        <planeGeometry args={[Math.max(width - 0.08, 0.1), Math.max(depth - 0.08, 0.1)]} />
+        <meshStandardMaterial color={floorColor} roughness={0.82} metalness={0.02} transparent opacity={0.32} />
+      </mesh>
 
       {/* Baseboard trim */}
       <mesh position={[0, 0.04, -hd + 0.005]} receiveShadow>
