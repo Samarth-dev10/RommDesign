@@ -18,6 +18,7 @@ import { useGLTF, Environment, Center } from '@react-three/drei';
 import { Suspense, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Palette, Sun } from 'lucide-react';
+import { isCatalogAssetReady } from '../../utils/catalogUtils';
 
 function SpinningModel({ modelPath }) {
   const { scene } = useGLTF(modelPath);
@@ -85,10 +86,10 @@ function FurnitureCard({ item, index }) {
       {...dragProps}
     >
       <div className="flex-1 flex items-center justify-center bg-linear-to-b from-slate-50 to-slate-100/50 relative overflow-hidden">
-        {isHovered ? (
+        {isHovered && isCatalogAssetReady(item) ? (
           <PreviewCanvas modelPath={item.modelPath} />
         ) : (
-          <span className="text-[28px] opacity-70">
+          <span className="text-[28px] opacity-70" aria-label={`${item.name} catalog item`}>
             {getCategoryIcon(item.category)}
           </span>
         )}

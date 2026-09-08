@@ -7,6 +7,8 @@
 import { create } from 'zustand';
 import { generateId } from '../utils/idUtils';
 import { getFurnitureById } from '../data/furnitureRegistry';
+import { getCatalogFootprint } from '../utils/catalogUtils';
+import { furnitureInstanceToDto } from '../utils/catalogApi';
 import { instantiateTemplate } from '../data/roomTemplates';
 import { MAX_HISTORY_SIZE } from '../constants';
 import { cloneFurnitureState } from '../utils/coordinateTransformers';
@@ -31,8 +33,8 @@ function normalizeFurnitureItem(item) {
     position: normalizeVector(item.position, [0, 0, 0]),
     rotation: normalizeVector(item.rotation, [0, 0, 0]),
     scale,
-    isLocked: Boolean(item.isLocked ?? item.locked),
-    isVisible: item.isVisible !== false && item.visible !== false,
+    isLocked: Boolean(item.isLocked ?? item.is_locked ?? item.locked),
+    isVisible: item.isVisible !== false && item.is_visible !== false && item.visible !== false,
     isColliding: false,
   };
 }
@@ -140,6 +142,7 @@ const useStore = create((set, get) => ({
       position: [...position],
       rotation: [...definition.defaultRotation],
       scale: [...definition.defaultScale],
+      bounds: getCatalogFootprint(definition, definition.defaultScale),
       isLocked: false,
       isVisible: true,
       isColliding: false,
@@ -397,9 +400,9 @@ const useStore = create((set, get) => ({
       room,
       windows,
       doors,
-      furniture,
-      lightPreset,
-      exportedAt: new Date().toISOString(),
+  furniture: furniture.map(furnitureInstanceToDto),
+  lightPreset,
+  exportedAt: new Date().toISOString(),
     };
   },
 
@@ -428,7 +431,7 @@ const useStore = create((set, get) => ({
 
   // ═══════════════════════════════════════════════
   // Search & Categories
-  // ═══════════════════════════════════════════════
+  // ════════════════════��══════════════════════════
 
   setSearchQuery: (query) => set({ searchQuery: query }),
   setSelectedCategory: (cat) => set({ selectedCategory: cat }),

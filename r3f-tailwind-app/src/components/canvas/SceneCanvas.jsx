@@ -19,12 +19,7 @@ import MeasurementOverlay from './MeasurementOverlay';
 import useStore from '../../store/useStore';
 
 function SceneFallback() {
-  return (
-    <mesh position={[0, 0.75, 0]}>
-      <boxGeometry args={[1.2, 1.2, 1.2]} />
-      <meshStandardMaterial color="#36d6c3" wireframe transparent opacity={0.7} />
-    </mesh>
-  );
+  return null;
 }
 
 class SceneErrorBoundary extends React.Component {
