@@ -1,11 +1,15 @@
 /** Debounced browser-local persistence for the editor. */
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useSyncExternalStore } from 'react';
 import useStore from '../store/useStore';
 import { loadFromLocalStorage, saveToLocalStorage } from '../utils/roomUtils';
 
 export default function useAutosave() {
   const restored = useRef(false);
-  const [state, setState] = useState(() => useStore.getState());
+  const state = useSyncExternalStore(
+    useStore.subscribe,
+    useStore.getState,
+    useStore.getState,
+  );
   const room = state.room;
   const windows = state.windows;
   const doors = state.doors;
@@ -16,11 +20,6 @@ export default function useAutosave() {
   const saveStatus = state.saveStatus;
   const importRoom = state.importRoom;
   const setSaveStatus = state.setSaveStatus;
-
-  useEffect(() => {
-    const unsubscribe = useStore.subscribe((nextState) => setState(nextState));
-    return unsubscribe;
-  }, []);
 
   useEffect(() => {
     if (restored.current) return;
