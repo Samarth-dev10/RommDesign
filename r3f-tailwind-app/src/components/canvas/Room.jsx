@@ -7,6 +7,7 @@
 import React, { useMemo } from 'react';
 import * as THREE from 'three';
 import useStore from '../../store/useStore';
+import { FLOORING_MATERIALS } from '../../constants';
 
 /** Create a wall mesh. */
 function Wall({ position, size, color, rotation = [0, 0, 0] }) {
@@ -96,6 +97,7 @@ export default function Room() {
   const doors = useStore((s) => s.doors);
 
   const { width, depth, height, wallColor, floorColor, ceilingColor, wallThickness } = room;
+  const floorMaterial = FLOORING_MATERIALS[room.floorMaterial] || FLOORING_MATERIALS.oakNatural;
   const hw = width / 2;
   const hd = depth / 2;
   const hh = height / 2;
@@ -217,11 +219,11 @@ export default function Room() {
       >
         <planeGeometry args={[width, depth]} />
         <meshStandardMaterial
-          color={floorColor}
-          roughness={0.7}
-          metalness={0.05}
-          envMapIntensity={0.6}
-          clearcoat={0.18}
+          color={floorMaterial.color || floorColor}
+          roughness={floorMaterial.roughness}
+          metalness={floorMaterial.metalness}
+          envMapIntensity={floorMaterial.pattern === 'tile' ? 0.72 : 0.48}
+          clearcoat={floorMaterial.pattern === 'tile' ? 0.28 : 0.12}
           clearcoatRoughness={0.42}
           side={THREE.DoubleSide}
         />

@@ -10,7 +10,7 @@ import REGISTRY, {
   getFurnitureByCategory,
   searchFurniture,
 } from '../../data/furnitureRegistry';
-import { CATEGORIES, LIGHT_PRESET_OPTIONS, LIGHT_PRESETS } from '../../constants';
+import { CATEGORIES, FLOORING_MATERIAL_OPTIONS, FLOORING_MATERIALS, LIGHT_PRESET_OPTIONS, LIGHT_PRESETS } from '../../constants';
 import SearchBar from '../ui/SearchBar';
 import { useDragSource } from '../../hooks/useDragDrop';
 import { Canvas, useFrame } from '@react-three/fiber';
@@ -281,18 +281,37 @@ export default function Sidebar() {
         </button>
         {appearanceOpen && (
           <div className="grid grid-cols-3 gap-2 px-4 pb-3">
-            {[['Wall', 'wallColor'], ['Floor', 'floorColor'], ['Ceiling', 'ceilingColor']].map(([label, key]) => (
-              <label key={key} className="flex cursor-pointer flex-col gap-1 text-[10px] font-semibold text-slate-500">
-                <span>{label}</span>
-                <input
-                  type="color"
-                  value={room[key] || '#ffffff'}
-                  onChange={(event) => setRoomAppearance({ [key]: event.target.value })}
-                  className="h-7 w-full cursor-pointer rounded-md border border-slate-200 bg-white p-0.5"
-                  aria-label={`${label} color`}
-                />
-              </label>
-            ))}
+            <div className="col-span-3 grid grid-cols-2 gap-1.5">
+              {FLOORING_MATERIAL_OPTIONS.map((materialId) => {
+                const material = FLOORING_MATERIALS[materialId];
+                const active = room.floorMaterial === materialId;
+                return (
+                  <button
+                    key={materialId}
+                    type="button"
+                    onClick={() => setRoomAppearance({ floorMaterial: materialId, floorColor: material.color })}
+                    className={`flex items-center gap-2 rounded-md border px-2 py-1.5 text-left transition-colors ${active ? 'border-[#c7a66a] bg-[#c7a66a]/10' : 'border-slate-200 bg-white hover:border-slate-300'}`}
+                    aria-pressed={active}
+                  >
+                    <span className="size-6 shrink-0 rounded-sm border border-black/10" style={{ backgroundColor: material.color }} aria-hidden="true" />
+                    <span className="min-w-0">
+                      <span className="block truncate text-[10px] font-semibold text-slate-700">{material.label}</span>
+                      <span className="block text-[9px] text-slate-400">{material.price ? `+$${material.price.toLocaleString()}` : 'Included'}</span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            <label className="col-span-3 flex items-center justify-between gap-2 text-[10px] font-semibold text-slate-500">
+              <span>Wall tone</span>
+              <input
+                type="color"
+                value={room.wallColor || '#ffffff'}
+                onChange={(event) => setRoomAppearance({ wallColor: event.target.value })}
+                className="h-6 w-12 cursor-pointer rounded-md border border-slate-200 bg-white p-0.5"
+                aria-label="Wall tone"
+              />
+            </label>
             <label className="col-span-3 flex items-center justify-between gap-2 text-[10px] font-semibold text-slate-500">
               <span className="flex items-center gap-1.5"><Sun className="size-3.5" aria-hidden="true" /> Lighting</span>
               <select value={lightPreset} onChange={(event) => setLightPreset(event.target.value)} className="rounded-md border border-slate-200 bg-white px-2 py-1 text-[10px] font-bold text-slate-700">

@@ -143,6 +143,17 @@ export const LIGHT_PRESETS = {
 
 export const LIGHT_PRESET_OPTIONS = ['morning', 'midday', 'afternoon', 'goldenHour', 'evening', 'night'];
 
+export const FLOORING_MATERIALS = {
+  oakNatural: { label: 'Oak Natural', subtitle: 'Warm engineered oak', color: '#bd8d59', roughness: 0.58, metalness: 0.02, pattern: 'plank', price: 0 },
+  oakGrey: { label: 'Oak Grey', subtitle: 'Smoked ash oak', color: '#8c8a81', roughness: 0.64, metalness: 0.02, pattern: 'plank', price: 3200 },
+  walnutPremium: { label: 'Walnut Premium', subtitle: 'Deep walnut veneer', color: '#71452f', roughness: 0.46, metalness: 0.02, pattern: 'plank', price: 5400 },
+  concreteLight: { label: 'Concrete Light', subtitle: 'Soft mineral finish', color: '#aaa79c', roughness: 0.82, metalness: 0.01, pattern: 'slab', price: 2100 },
+  porcelainTile: { label: 'Porcelain Tile', subtitle: 'Large-format stone', color: '#75766f', roughness: 0.34, metalness: 0.04, pattern: 'tile', price: 4800 },
+  travertine: { label: 'Travertine', subtitle: 'Natural limestone', color: '#c5b396', roughness: 0.72, metalness: 0.01, pattern: 'slab', price: 6200 },
+};
+
+export const FLOORING_MATERIAL_OPTIONS = Object.keys(FLOORING_MATERIALS);
+
 // ─── Snap Settings ──────────────────────────────────────────
 export const GRID_SIZES = [
   { value: 0.05, label: '5 cm' },
