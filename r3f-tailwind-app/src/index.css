@@ -2,19 +2,33 @@
 
 @theme {
   --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
-  --color-shell: #101318;
-  --color-panel: #171b22;
-  --color-panel-raised: #1d232c;
-  --color-line: #2b333e;
-  --color-ink: #edf2f7;
-  --color-muted: #8d99a8;
-  --color-accent: #36d6c3;
-  --color-warn: #f06464;
+  --color-shell: #121313;
+  --color-panel: #1a1b1a;
+  --color-panel-raised: #232421;
+  --color-line: #343631;
+  --color-ink: #eee9df;
+  --color-muted: #9a9a90;
+  --color-accent: #c7a66a;
+  --color-warn: #d97868;
 }
 
 :root {
   color-scheme: dark;
-  background: #101318;
+  background: #121313;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: #121313;
+  color: #eee9df;
+  font-family: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: 0.01em;
+}
+
+::selection {
+  background: #c7a66a;
+  color: #121313;
 }
 
 * { box-sizing: border-box; }
@@ -32,25 +46,39 @@ button:focus-visible, select:focus-visible, input:focus-visible {
   gap: 0.4rem;
   height: 2rem;
   padding: 0 0.7rem;
-  border: 1px solid #2b333e;
-  border-radius: 0.65rem;
-  background: #171b22;
-  color: #c5ced8;
+  border: 1px solid #343631;
+  border-radius: 0.45rem;
+  background: #1a1b1a;
+  color: #cfc9bd;
   font-size: 0.68rem;
   font-weight: 700;
   transition: color 160ms ease, border-color 160ms ease, background 160ms ease;
 }
 
 .toolbar-action:hover {
-  border-color: #36d6c3;
-  background: #1d232c;
-  color: #edf2f7;
+  border-color: #c7a66a;
+  background: #232421;
+  color: #eee9df;
+}
+
+button, select, input {
+  transition: border-color 160ms ease, background 160ms ease, color 160ms ease, box-shadow 160ms ease;
+}
+
+button:hover:not(:disabled), select:hover, input:hover {
+  border-color: #c7a66a;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
 }
 
 #furniture-sidebar, #inspector-panel {
-  background: #171b22 !important;
-  border-color: #2b333e !important;
-  color: #edf2f7;
+  background: #1a1b1a !important;
+  border-color: #343631 !important;
+  color: #eee9df;
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.22);
 }
 
 #furniture-sidebar .bg-white, #inspector-panel .bg-white,
