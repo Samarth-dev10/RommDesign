@@ -8,6 +8,7 @@ import React from 'react';
 import useStore from '../../store/useStore';
 import { TRANSFORM_MODES, GRID_SIZES, ROTATION_SNAPS } from '../../constants';
 import { motion } from 'framer-motion';
+import { Copy, Download, RotateCcw, Trash2, Upload } from 'lucide-react';
 
 export default function Toolbar() {
   const transformMode = useStore((s) => s.transformMode);
@@ -27,6 +28,8 @@ export default function Toolbar() {
   const rotationSnap = useStore((s) => s.rotationSnap);
   const setGridSize = useStore((s) => s.setGridSize);
   const setRotationSnap = useStore((s) => s.setRotationSnap);
+  const exportRoom = useStore((s) => s.exportRoom);
+  const importRoom = useStore((s) => s.importRoom);
 
   const hasSelection = selectedIds.length > 0;
 
@@ -35,7 +38,7 @@ export default function Toolbar() {
       initial={{ y: 50, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className="flex-none flex items-center justify-center bg-white border-t border-slate-200/60 shadow-[0_-2px_10px_rgba(0,0,0,0.02)] z-50 h-14 px-5 overflow-x-auto no-scrollbar w-full" 
+      className="flex-none flex items-center justify-center bg-panel border-t border-line shadow-[0_-8px_24px_rgba(0,0,0,0.16)] z-50 h-14 px-5 overflow-x-auto no-scrollbar w-full" 
       id="main-toolbar"
     >
       {/* Transform Modes */}
@@ -157,8 +160,39 @@ export default function Toolbar() {
 
       <div className="w-px h-5 bg-black/10 shrink-0 mx-2" />
       
-       {/* Room Actions */}
-      
+      {/* Room Actions */}
+      <div className="ml-auto flex items-center gap-1.5 shrink-0">
+        <button className="toolbar-action" onClick={() => downloadRoom(exportRoom())} title="Export room">
+          <Download className="size-3.5" aria-hidden="true" /> Export
+        </button>
+        <label className="toolbar-action cursor-pointer" title="Import room">
+          <Upload className="size-3.5" aria-hidden="true" /> Import
+          <input className="sr-only" type="file" accept="application/json" onChange={(event) => importFile(event, importRoom)} />
+        </label>
+        <button className="toolbar-action" onClick={resetRoom} title="Reset room">
+          <RotateCcw className="size-3.5" aria-hidden="true" /> Reset
+        </button>
+      </div>
     </motion.div>
   );
+}
+
+function downloadRoom(data) {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = `roomcraft-${new Date().toISOString().slice(0, 10)}.json`;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
+function importFile(event, importRoom) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try { importRoom(JSON.parse(reader.result)); } catch { /* invalid files are ignored */ }
+  };
+  reader.readAsText(file);
 }

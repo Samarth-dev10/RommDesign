@@ -1,5 +1,77 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --color-shell: #101318;
+  --color-panel: #171b22;
+  --color-panel-raised: #1d232c;
+  --color-line: #2b333e;
+  --color-ink: #edf2f7;
+  --color-muted: #8d99a8;
+  --color-accent: #36d6c3;
+  --color-warn: #f06464;
+}
+
+:root {
+  color-scheme: dark;
+  background: #101318;
+}
+
+* { box-sizing: border-box; }
+
+button, select, input { font: inherit; }
+
+button:focus-visible, select:focus-visible, input:focus-visible {
+  outline: 2px solid #36d6c3;
+  outline-offset: 2px;
+}
+
+.toolbar-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: 2rem;
+  padding: 0 0.7rem;
+  border: 1px solid #2b333e;
+  border-radius: 0.65rem;
+  background: #171b22;
+  color: #c5ced8;
+  font-size: 0.68rem;
+  font-weight: 700;
+  transition: color 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+.toolbar-action:hover {
+  border-color: #36d6c3;
+  background: #1d232c;
+  color: #edf2f7;
+}
+
+#furniture-sidebar, #inspector-panel {
+  background: #171b22 !important;
+  border-color: #2b333e !important;
+  color: #edf2f7;
+}
+
+#furniture-sidebar .bg-white, #inspector-panel .bg-white,
+#furniture-sidebar .bg-slate-50, #inspector-panel .bg-slate-50,
+#furniture-sidebar .bg-slate-50\/80, #inspector-panel .bg-slate-50\/80 {
+  background: #1d232c !important;
+  border-color: #2b333e !important;
+}
+
+#furniture-sidebar .text-slate-900, #inspector-panel .text-slate-900,
+#furniture-sidebar .text-slate-700, #inspector-panel .text-slate-700 {
+  color: #edf2f7 !important;
+}
+
+#furniture-sidebar .text-slate-500, #inspector-panel .text-slate-500,
+#furniture-sidebar .text-slate-400, #inspector-panel .text-slate-400 {
+  color: #8d99a8 !important;
+}
+
+#furniture-sidebar input, #inspector-panel input {
+  background: #101318 !important;
+  border-color: #2b333e !important;
+  color: #edf2f7 !important;
 }

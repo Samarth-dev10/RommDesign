@@ -37,7 +37,7 @@ export default function Navbar() {
       initial={{ y: -50, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className="flex-none flex items-center gap-4 px-5 bg-white border-b border-slate-200/60 z-50 h-14 shadow-[0_2px_10px_rgba(0,0,0,0.02)]" 
+      className="flex-none flex items-center gap-4 px-5 bg-panel border-b border-line z-50 h-14 shadow-[0_8px_24px_rgba(0,0,0,0.18)]" 
       id="main-navbar"
     >
       {/* Logo & Title */}
@@ -59,7 +59,7 @@ export default function Navbar() {
       <div className="flex items-center gap-2">
         <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest hidden md:block">Template</label>
         <select
-          className="bg-slate-50 border border-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 hover:border-slate-300 transition-colors min-w-32 cursor-pointer shadow-sm"
+          className="bg-panel-raised border border-line text-ink px-3 py-1.5 rounded-lg text-xs font-semibold outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 hover:border-slate-300 transition-colors min-w-32 cursor-pointer shadow-sm"
           value={currentTemplate}
           onChange={(e) => setTemplate(e.target.value)}
           id="template-selector"
@@ -78,7 +78,7 @@ export default function Navbar() {
       <div className="flex items-center gap-2">
         <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest hidden md:block">Camera</label>
         <select
-          className="bg-slate-50 border border-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 hover:border-slate-300 transition-colors min-w-28 cursor-pointer shadow-sm"
+          className="bg-panel-raised border border-line text-ink px-3 py-1.5 rounded-lg text-xs font-semibold outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 hover:border-slate-300 transition-colors min-w-28 cursor-pointer shadow-sm"
           value={cameraMode}
           onChange={(e) => setCameraMode(e.target.value)}
           id="camera-selector"
@@ -97,7 +97,7 @@ export default function Navbar() {
       <div className="flex items-center gap-2">
         <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest hidden md:block">Lighting</label>
         <select
-          className="bg-slate-50 border border-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 hover:border-slate-300 transition-colors min-w-28 cursor-pointer shadow-sm"
+          className="bg-panel-raised border border-line text-ink px-3 py-1.5 rounded-lg text-xs font-semibold outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 hover:border-slate-300 transition-colors min-w-28 cursor-pointer shadow-sm"
           value={lightPreset}
           onChange={(e) => setLightPreset(e.target.value)}
           id="light-selector"

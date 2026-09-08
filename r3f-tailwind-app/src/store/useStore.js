@@ -12,6 +12,34 @@ import { MAX_HISTORY_SIZE } from '../constants';
 import { cloneFurnitureState } from '../utils/coordinateTransformers';
 
 const DEFAULT_TEMPLATE = 'modern-living-room';
+const MIN_SCALE = 0.1;
+const MAX_SCALE = 5;
+
+function finiteNumber(value, fallback = 0) {
+  return Number.isFinite(Number(value)) ? Number(value) : fallback;
+}
+
+function normalizeVector(vector, fallback, length = 3) {
+  return Array.from({ length }, (_, index) => finiteNumber(vector?.[index], fallback[index] ?? 0));
+}
+
+function normalizeFurnitureItem(item) {
+  const scale = normalizeVector(item.scale, [1, 1, 1]).map((value) => Math.min(MAX_SCALE, Math.max(MIN_SCALE, value)));
+  return {
+    ...item,
+    catalogItemId: item.catalogItemId ?? item.registryId,
+    position: normalizeVector(item.position, [0, 0, 0]),
+    rotation: normalizeVector(item.rotation, [0, 0, 0]),
+    scale,
+    isLocked: Boolean(item.isLocked ?? item.locked),
+    isVisible: item.isVisible !== false && item.visible !== false,
+    isColliding: false,
+  };
+}
+
+function normalizeFurniture(items = []) {
+  return items.filter(Boolean).map(normalizeFurnitureItem);
+}
 
 function createInitialState() {
   const template = instantiateTemplate(DEFAULT_TEMPLATE);
@@ -21,8 +49,8 @@ function createInitialState() {
     room: template.room,
     windows: template.windows,
     doors: template.doors,
-    furniture: template.furniture,
-    lastSavedState: cloneFurnitureState(template.furniture),
+    furniture: normalizeFurniture(template.furniture),
+    lastSavedState: cloneFurnitureState(normalizeFurniture(template.furniture)),
 
     // ── Selection ────────────────────────────────
     selectedIds: [],
@@ -88,9 +116,9 @@ const useStore = create((set, get) => ({
       room: template.room,
       windows: template.windows,
       doors: template.doors,
-      furniture: template.furniture,
+      furniture: normalizeFurniture(template.furniture),
       lightPreset: template.lightPreset || 'day',
-      lastSavedState: cloneFurnitureState(template.furniture),
+      lastSavedState: cloneFurnitureState(normalizeFurniture(template.furniture)),
       selectedIds: [],
       history: [],
       future: [],
@@ -145,8 +173,8 @@ const useStore = create((set, get) => ({
 
   updateFurniture: (id, updates) => {
     set((state) => ({
-      furniture: state.furniture.map((f) =>
-        f.id === id ? { ...f, ...updates } : f
+      furniture: state.furniture.map((item) =>
+        item.id === id ? normalizeFurnitureItem({ ...item, ...updates }) : item,
       ),
     }));
   },
@@ -168,8 +196,8 @@ const useStore = create((set, get) => ({
   updateFurnitureWithHistory: (id, updates) => {
     get()._pushHistory();
     set((state) => ({
-      furniture: state.furniture.map((f) =>
-        f.id === id ? { ...f, ...updates } : f
+      furniture: state.furniture.map((item) =>
+        item.id === id ? normalizeFurnitureItem({ ...item, ...updates }) : item,
       ),
     }));
   },
@@ -209,6 +237,7 @@ const useStore = create((set, get) => ({
 
   selectFurniture: (id, additive = false) => {
     set((state) => {
+      if (!state.furniture.some((item) => item.id === id)) return state;
       if (additive) {
         const isSelected = state.selectedIds.includes(id);
         return {
@@ -352,20 +381,16 @@ const useStore = create((set, get) => ({
   },
 
   importRoom: (data) => {
-    if (!data || !data.furniture) return;
+    if (!data || !Array.isArray(data.furniture)) return;
+    const room = data.room || createInitialState().room;
+    const furniture = normalizeFurniture(data.furniture);
     set({
       currentTemplate: data.currentTemplate || 'custom',
-      room: data.room,
+      room,
       windows: data.windows || [],
       doors: data.doors || [],
-      furniture: data.furniture.map((item) => ({
-        ...item,
-        catalogItemId: item.catalogItemId ?? item.registryId,
-        isLocked: item.isLocked ?? item.locked ?? false,
-        isVisible: item.isVisible ?? item.visible ?? true,
-        isColliding: false,
-      })),
-      lastSavedState: cloneFurnitureState(data.furniture),
+      furniture,
+      lastSavedState: cloneFurnitureState(furniture),
       lightPreset: data.lightPreset || 'day',
       selectedIds: [],
       history: [],
