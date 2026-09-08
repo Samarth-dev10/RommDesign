@@ -1,25 +1,20 @@
 /** Debounced browser-local persistence for the editor. */
-import { useEffect, useRef, useSyncExternalStore } from 'react';
+import { useEffect, useRef } from 'react';
 import useStore from '../store/useStore';
 import { loadFromLocalStorage, saveToLocalStorage } from '../utils/roomUtils';
 
 export default function useAutosave() {
   const restored = useRef(false);
-  const state = useSyncExternalStore(
-    useStore.subscribe,
-    useStore.getState,
-    useStore.getState,
-  );
-  const room = state.room;
-  const windows = state.windows;
-  const doors = state.doors;
-  const furniture = state.furniture;
-  const currentTemplate = state.currentTemplate;
-  const lightPreset = state.lightPreset;
-  const favorites = state.favorites;
-  const saveStatus = state.saveStatus;
-  const importRoom = state.importRoom;
-  const setSaveStatus = state.setSaveStatus;
+  const room = useStore((state) => state.room);
+  const windows = useStore((state) => state.windows);
+  const doors = useStore((state) => state.doors);
+  const furniture = useStore((state) => state.furniture);
+  const currentTemplate = useStore((state) => state.currentTemplate);
+  const lightPreset = useStore((state) => state.lightPreset);
+  const favorites = useStore((state) => state.favorites);
+  const saveStatus = useStore((state) => state.saveStatus);
+  const importRoom = useStore((state) => state.importRoom);
+  const setSaveStatus = useStore((state) => state.setSaveStatus);
 
   useEffect(() => {
     if (restored.current) return;
