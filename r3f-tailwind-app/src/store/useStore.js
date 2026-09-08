@@ -388,7 +388,7 @@ const useStore = create((set, get) => ({
       selectedIds: [],
       history: [],
       future: [],
-      saveStatus: 'error',
+      saveStatus: 'idle',
     })),
 
   exportRoom: () => {
@@ -418,6 +418,10 @@ const useStore = create((set, get) => ({
       furniture,
       lastSavedState: cloneFurnitureState(furniture),
       lightPreset: data.lightPreset || 'day',
+      favorites: Array.isArray(data.favorites) ? data.favorites : [],
+      showMinimap: data.showMinimap !== false,
+      showMeasurements: data.showMeasurements !== false,
+      showGrid: data.showGrid !== false,
       selectedIds: [],
       history: [],
       future: [],

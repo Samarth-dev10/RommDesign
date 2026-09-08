@@ -20,8 +20,11 @@ export default function SaveIndicator() {
       {saveStatus === 'saved' && (
         <>
           <span className="text-xs leading-none">✓</span>
-          Saved
+          Saved locally
         </>
+      )}
+      {saveStatus === 'error' && (
+        <span className="text-rose-500">Unable to save locally</span>
       )}
     </div>
   );

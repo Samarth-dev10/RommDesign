@@ -1,47 +1,49 @@
-/**
- * useAutosave — Automatically saves the room state to the source code (roomTemplates.js)
- * whenever the room dimensions or furniture array changes.
- */
-import { useEffect } from 'react';
+/** Debounced browser-local persistence for the editor. */
+import { useEffect, useRef } from 'react';
 import useStore from '../store/useStore';
+import { loadFromLocalStorage, saveToLocalStorage } from '../utils/roomUtils';
 
 export default function useAutosave() {
+  const restored = useRef(false);
   const room = useStore((s) => s.room);
+  const windows = useStore((s) => s.windows);
+  const doors = useStore((s) => s.doors);
   const furniture = useStore((s) => s.furniture);
   const currentTemplate = useStore((s) => s.currentTemplate);
+  const lightPreset = useStore((s) => s.lightPreset);
+  const favorites = useStore((s) => s.favorites);
+  const saveStatus = useStore((s) => s.saveStatus);
+  const importRoom = useStore((s) => s.importRoom);
   const setSaveStatus = useStore((s) => s.setSaveStatus);
 
   useEffect(() => {
-    if (!currentTemplate || furniture.length === 0) return;
+    if (restored.current) return;
+    restored.current = true;
+    const saved = loadFromLocalStorage();
+    if (saved?.furniture && Array.isArray(saved.furniture)) importRoom(saved);
+  }, [importRoom]);
 
+  useEffect(() => {
+    if (!restored.current) return;
     setSaveStatus('saving');
-    const timer = setTimeout(async () => {
-      try {
-        const response = await fetch('/api/save-room', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            templateId: currentTemplate,
-            room,
-            furniture,
-          }),
-        });
+    const timer = window.setTimeout(() => {
+      const ok = saveToLocalStorage({
+        currentTemplate,
+        room,
+        windows,
+        doors,
+        furniture,
+        lightPreset,
+        favorites,
+      });
+      setSaveStatus(ok ? 'saved' : 'error');
+    }, 700);
+    return () => window.clearTimeout(timer);
+  }, [room, windows, doors, furniture, currentTemplate, lightPreset, favorites, setSaveStatus]);
 
-        if (response.ok) {
-          setSaveStatus('saved');
-          setTimeout(() => setSaveStatus('idle'), 2000);
-        } else {
-          console.error('Failed to save to source code');
-          setSaveStatus('idle');
-        }
-      } catch (error) {
-        console.error('Error during source code persistence:', error);
-        setSaveStatus('idle');
-      }
-    }, 1500); // 1.5s debounce to avoid thrashing during continuous sliding/dragging
-
-    return () => clearTimeout(timer);
-  }, [room, furniture, currentTemplate, setSaveStatus]);
+  useEffect(() => {
+    if (saveStatus !== 'saved') return undefined;
+    const timer = window.setTimeout(() => setSaveStatus('idle'), 1800);
+    return () => window.clearTimeout(timer);
+  }, [saveStatus, setSaveStatus]);
 }

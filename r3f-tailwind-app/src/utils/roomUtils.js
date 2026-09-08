@@ -66,6 +66,9 @@ export function saveToLocalStorage(state) {
       furniture: state.furniture,
       lightPreset: state.lightPreset,
       favorites: state.favorites,
+      showMinimap: state.showMinimap,
+      showMeasurements: state.showMeasurements,
+      showGrid: state.showGrid,
       savedAt: new Date().toISOString(),
     };
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
