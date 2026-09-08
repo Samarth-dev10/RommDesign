@@ -74,6 +74,8 @@ const modernLivingRoom = {
     f('undefined', [0, 0, -1]),
     f('undefined', [-0.75, 0.25, -2], [0, 0, 0], [0.6, 0.6, 0.6]),
     f('undefined', [-0.5, 0, -0.5]),
+    f('undefined', [0.25, 0, -2]),
+    f('undefined', [-0.25, 0.25, 0.75], [0, 0, 0], [0.8, 0.8, 0.8]),
   ],
   lightPreset: 'day',
 };
