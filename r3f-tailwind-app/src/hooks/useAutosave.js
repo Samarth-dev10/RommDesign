@@ -1,20 +1,26 @@
 /** Debounced browser-local persistence for the editor. */
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import useStore from '../store/useStore';
 import { loadFromLocalStorage, saveToLocalStorage } from '../utils/roomUtils';
 
 export default function useAutosave() {
   const restored = useRef(false);
-  const room = useStore((s) => s.room);
-  const windows = useStore((s) => s.windows);
-  const doors = useStore((s) => s.doors);
-  const furniture = useStore((s) => s.furniture);
-  const currentTemplate = useStore((s) => s.currentTemplate);
-  const lightPreset = useStore((s) => s.lightPreset);
-  const favorites = useStore((s) => s.favorites);
-  const saveStatus = useStore((s) => s.saveStatus);
-  const importRoom = useStore((s) => s.importRoom);
-  const setSaveStatus = useStore((s) => s.setSaveStatus);
+  const [state, setState] = useState(() => useStore.getState());
+  const room = state.room;
+  const windows = state.windows;
+  const doors = state.doors;
+  const furniture = state.furniture;
+  const currentTemplate = state.currentTemplate;
+  const lightPreset = state.lightPreset;
+  const favorites = state.favorites;
+  const saveStatus = state.saveStatus;
+  const importRoom = state.importRoom;
+  const setSaveStatus = state.setSaveStatus;
+
+  useEffect(() => {
+    const unsubscribe = useStore.subscribe((nextState) => setState(nextState));
+    return unsubscribe;
+  }, []);
 
   useEffect(() => {
     if (restored.current) return;
