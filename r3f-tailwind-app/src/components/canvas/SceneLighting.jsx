@@ -13,9 +13,23 @@ export default function SceneLighting() {
   const lightPreset = useStore((s) => s.lightPreset);
 
   const config = useMemo(
-    () => LIGHT_PRESETS[lightPreset] || LIGHT_PRESETS.day,
+    () => LIGHT_PRESETS[lightPreset] || LIGHT_PRESETS.midday,
     [lightPreset]
   );
+
+  const sunPosition = useMemo(() => {
+    const { azimuth = 218, elevation = 62 } = config.directional;
+    const azimuthRadians = (azimuth * Math.PI) / 180;
+    const elevationRadians = (elevation * Math.PI) / 180;
+    const radius = 12;
+    const horizontal = Math.cos(elevationRadians) * radius;
+
+    return [
+      Math.sin(azimuthRadians) * horizontal,
+      Math.sin(elevationRadians) * radius,
+      Math.cos(azimuthRadians) * horizontal,
+    ];
+  }, [config]);
 
   return (
     <>
@@ -27,7 +41,7 @@ export default function SceneLighting() {
 
       {/* Primary directional light with shadows */}
       <directionalLight
-        position={config.directional.position}
+        position={sunPosition}
         intensity={config.directional.intensity}
         color={config.directional.color}
         castShadow={false}

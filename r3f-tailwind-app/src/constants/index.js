@@ -64,49 +64,84 @@ export const CAMERA_MODES = {
   },
 };
 
-// ─── Light Presets ──────────────────────────────────────────
+// ─── Architectural Sunlight Presets ─────────────────────────
+// Azimuth is measured around the room in degrees; elevation controls the sun height.
 export const LIGHT_PRESETS = {
-  day: {
-    label: 'Day',
-    icon: '☀️',
-    ambient: { intensity: 0.6, color: '#ffffff' },
-    directional: { intensity: 1.2, color: '#fff5e6', position: [5, 8, 3] },
+  morning: {
+    label: 'Morning',
+    shortLabel: 'AM',
+    ambient: { intensity: 0.42, color: '#dbe7ef' },
+    directional: { intensity: 1.35, color: '#f8d6a6', azimuth: 132, elevation: 28, softness: 0.7 },
     environment: 'apartment',
-    background: '#87CEEB',
+    background: '#17191a',
+  },
+  midday: {
+    label: 'Midday',
+    shortLabel: 'Noon',
+    ambient: { intensity: 0.58, color: '#eef1ef' },
+    directional: { intensity: 1.55, color: '#fff8ea', azimuth: 218, elevation: 62, softness: 0.45 },
+    environment: 'studio',
+    background: '#1b1c1b',
+  },
+  afternoon: {
+    label: 'Afternoon',
+    shortLabel: 'PM',
+    ambient: { intensity: 0.48, color: '#e2e5e7' },
+    directional: { intensity: 1.42, color: '#f4c58e', azimuth: 252, elevation: 38, softness: 0.62 },
+    environment: 'apartment',
+    background: '#1b1a18',
+  },
+  goldenHour: {
+    label: 'Golden Hour',
+    shortLabel: 'Gold',
+    ambient: { intensity: 0.34, color: '#c8d0d2' },
+    directional: { intensity: 1.28, color: '#e99a5c', azimuth: 286, elevation: 18, softness: 0.95 },
+    environment: 'sunset',
+    background: '#211914',
   },
   evening: {
     label: 'Evening',
-    icon: '🌅',
-    ambient: { intensity: 0.3, color: '#ffd4a3' },
-    directional: { intensity: 0.8, color: '#ff8c42', position: [2, 4, -3] },
+    shortLabel: 'Dusk',
+    ambient: { intensity: 0.26, color: '#aebdce' },
+    directional: { intensity: 0.72, color: '#d49b76', azimuth: 306, elevation: 12, softness: 1.1 },
     environment: 'sunset',
-    background: '#2d1b4e',
+    background: '#17171b',
   },
   night: {
     label: 'Night',
-    icon: '🌙',
-    ambient: { intensity: 0.15, color: '#4a5568' },
-    directional: { intensity: 0.3, color: '#a0aec0', position: [-3, 6, -2] },
+    shortLabel: 'Night',
+    ambient: { intensity: 0.14, color: '#71829a' },
+    directional: { intensity: 0.24, color: '#9aaac0', azimuth: 42, elevation: 42, softness: 0.8 },
     environment: 'night',
-    background: '#0a0a1a',
+    background: '#0c0e12',
+  },
+  day: {
+    label: 'Midday',
+    shortLabel: 'Noon',
+    ambient: { intensity: 0.58, color: '#eef1ef' },
+    directional: { intensity: 1.55, color: '#fff8ea', azimuth: 218, elevation: 62, softness: 0.45 },
+    environment: 'studio',
+    background: '#1b1c1b',
   },
   warm: {
-    label: 'Warm Interior',
-    icon: '🔥',
-    ambient: { intensity: 0.5, color: '#ffe0b2' },
-    directional: { intensity: 0.9, color: '#ffcc80', position: [3, 6, 2] },
-    environment: 'apartment',
-    background: '#1a1410',
+    label: 'Golden Hour',
+    shortLabel: 'Gold',
+    ambient: { intensity: 0.34, color: '#c8d0d2' },
+    directional: { intensity: 1.28, color: '#e99a5c', azimuth: 286, elevation: 18, softness: 0.95 },
+    environment: 'sunset',
+    background: '#211914',
   },
   studio: {
-    label: 'Bright Studio',
-    icon: '💡',
-    ambient: { intensity: 0.8, color: '#f5f5f5' },
-    directional: { intensity: 1.5, color: '#ffffff', position: [0, 10, 0] },
+    label: 'Midday',
+    shortLabel: 'Noon',
+    ambient: { intensity: 0.58, color: '#eef1ef' },
+    directional: { intensity: 1.55, color: '#fff8ea', azimuth: 218, elevation: 62, softness: 0.45 },
     environment: 'studio',
-    background: '#e0e0e0',
+    background: '#1b1c1b',
   },
 };
+
+export const LIGHT_PRESET_OPTIONS = ['morning', 'midday', 'afternoon', 'goldenHour', 'evening', 'night'];
 
 // ─── Snap Settings ──────────────────────────────────────────
 export const GRID_SIZES = [

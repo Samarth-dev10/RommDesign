@@ -10,7 +10,7 @@ import REGISTRY, {
   getFurnitureByCategory,
   searchFurniture,
 } from '../../data/furnitureRegistry';
-import { CATEGORIES } from '../../constants';
+import { CATEGORIES, LIGHT_PRESET_OPTIONS, LIGHT_PRESETS } from '../../constants';
 import SearchBar from '../ui/SearchBar';
 import { useDragSource } from '../../hooks/useDragDrop';
 import { Canvas, useFrame } from '@react-three/fiber';
@@ -296,10 +296,9 @@ export default function Sidebar() {
             <label className="col-span-3 flex items-center justify-between gap-2 text-[10px] font-semibold text-slate-500">
               <span className="flex items-center gap-1.5"><Sun className="size-3.5" aria-hidden="true" /> Lighting</span>
               <select value={lightPreset} onChange={(event) => setLightPreset(event.target.value)} className="rounded-md border border-slate-200 bg-white px-2 py-1 text-[10px] font-bold text-slate-700">
-                <option value="day">Daylight</option>
-                <option value="warm">Warm</option>
-                <option value="studio">Studio</option>
-                <option value="night">Night</option>
+                {LIGHT_PRESET_OPTIONS.map((presetId) => (
+                  <option key={presetId} value={presetId}>{LIGHT_PRESETS[presetId].label}</option>
+                ))}
               </select>
             </label>
           </div>
