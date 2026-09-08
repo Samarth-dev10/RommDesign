@@ -1,4 +1,5 @@
 /** Debounced browser-local persistence for the editor. */
+// Keep this hook on the standard Zustand selector path; no external-store hook is needed.
 import { useEffect, useRef } from 'react';
 import useStore from '../store/useStore';
 import { loadFromLocalStorage, saveToLocalStorage } from '../utils/roomUtils';
