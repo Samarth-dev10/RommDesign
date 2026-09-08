@@ -7,7 +7,6 @@
 import React, { Suspense } from 'react';
 import * as THREE from 'three';
 import { Canvas } from '@react-three/fiber';
-import { ContactShadows } from '@react-three/drei';
 import Room from './Room';
 import FurnitureManager from './FurnitureManager';
 import CollisionAdvisoryEngine from './CollisionAdvisoryEngine';
@@ -66,10 +65,9 @@ function DeselectPlane() {
 export default function SceneCanvas() {
   return (
     <Canvas
-      shadows
       camera={{
-        position: [8, 6, 8],
-        fov: 50,
+        position: [8.8, 6.6, 8.8],
+        fov: 46,
         near: 0.1,
         far: 100,
       }}
@@ -81,13 +79,15 @@ export default function SceneCanvas() {
       }}
       dpr={[1, 2]}
       onCreated={({ gl }) => {
-        gl.setClearColor('#101318', 0);
+        gl.setClearColor('#121313', 1);
       }}
       onPointerMissed={() => useStore.getState().clearSelection()}
       style={{ background: 'transparent' }}
     >
       <SceneErrorBoundary>
         <Suspense fallback={<SceneFallback />}>
+        <color attach="background" args={['#121313']} />
+        <fog attach="fog" args={['#121313', 18, 42]} />
         <SceneLighting />
         <Room />
         <FurnitureManager />
@@ -96,15 +96,7 @@ export default function SceneCanvas() {
         <MeasurementOverlay />
         <DeselectPlane />
 
-        {/* Contact shadows for grounding */}
-          <ContactShadows
-            position={[0, 0.01, 0]}
-            opacity={0.4}
-            scale={20}
-            blur={2}
-            far={4}
-            color="#1a1a2e"
-          />
+        {/* Directional lighting and room materials provide the grounding. */}
         </Suspense>
       </SceneErrorBoundary>
 

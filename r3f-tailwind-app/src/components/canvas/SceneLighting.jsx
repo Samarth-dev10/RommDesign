@@ -21,7 +21,7 @@ export default function SceneLighting() {
     <>
       {/* Ambient fill light */}
       <ambientLight
-        intensity={config.ambient.intensity}
+        intensity={config.ambient.intensity * 0.82}
         color={config.ambient.color}
       />
 
@@ -30,31 +30,23 @@ export default function SceneLighting() {
         position={config.directional.position}
         intensity={config.directional.intensity}
         color={config.directional.color}
-        castShadow
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
-        shadow-camera-far={30}
-        shadow-camera-left={-10}
-        shadow-camera-right={10}
-        shadow-camera-top={10}
-        shadow-camera-bottom={-10}
-        shadow-bias={-0.001}
+        castShadow={false}
       />
 
       {/* Secondary fill light */}
       <directionalLight
         position={[-3, 4, -2]}
-        intensity={config.ambient.intensity * 0.3}
+        intensity={config.ambient.intensity * 0.22}
         color={config.ambient.color}
       />
 
       {/* Hemisphere light for natural sky/ground color blending */}
       <hemisphereLight
-        args={['#b1e1ff', '#b97a20', 0.2]}
+        args={['#d9e4ec', '#55463a', 0.32]}
       />
 
-      {/* Environment map for reflections + visible sky background */}
-      <Environment preset={config.environment} background blur={0.5} />
+      {/* Environment light is used for reflections and soft ambient fill. */}
+      <Environment preset={config.environment} blur={0.72} />
     </>
   );
 }

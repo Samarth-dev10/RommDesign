@@ -94,11 +94,6 @@ export default function SceneControls() {
       (selectedItem?.bounds?.depth ?? 1) / 2,
     ];
     if (transformMode === 'scale') {
-      const uniformScale = clampScale(Math.max(obj.scale.x, obj.scale.y, obj.scale.z));
-      obj.scale.setScalar(uniformScale);
-    }
-
-    if (transformMode === 'scale') {
       const uniformScale = clampScale((obj.scale.x + obj.scale.y + obj.scale.z) / 3);
       obj.scale.setScalar(uniformScale);
     }
@@ -174,8 +169,8 @@ export default function SceneControls() {
         minDistance={1}
         maxDistance={40}
         enableDamping
-        dampingFactor={0.1}
-        target={[0, 0, 0]}
+        dampingFactor={0.08}
+        target={[0, 1.05, 0]}
       />
 
       {selectedItem && (

@@ -23,9 +23,9 @@ export const CAMERA_MODES = {
   perspective: {
     label: 'Perspective',
     icon: '🎥',
-    position: [8, 6, 8],
-    target: [0, 0, 0],
-    fov: 50,
+    position: [8.8, 6.6, 8.8],
+    target: [0, 1.05, 0],
+    fov: 46,
   },
   top: {
     label: 'Top View',

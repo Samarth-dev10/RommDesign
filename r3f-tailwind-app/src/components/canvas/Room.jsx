@@ -14,14 +14,14 @@ function Wall({ position, size, color, rotation = [0, 0, 0] }) {
     <mesh
       position={position}
       rotation={rotation}
-      receiveShadow
-      castShadow
+
     >
       <boxGeometry args={size} />
       <meshStandardMaterial
         color={color}
-        roughness={0.8}
-        metalness={0.05}
+        roughness={0.72}
+        metalness={0.04}
+        envMapIntensity={0.38}
       />
     </mesh>
   );
@@ -33,7 +33,7 @@ function WindowPanel({ position, size, thickness, rotation = [0, 0, 0] }) {
   return (
     <group position={position} rotation={rotation}>
       {/* Window frame */}
-      <mesh castShadow receiveShadow>
+      <mesh >
         <boxGeometry args={[size[0] + 0.08, size[1] + 0.08, depth]} />
         <meshStandardMaterial color="#333333" roughness={0.3} metalness={0.6} />
       </mesh>
@@ -72,12 +72,12 @@ function DoorPanel({ position, size, thickness, rotation = [0, 0, 0] }) {
   return (
     <group position={position} rotation={rotation}>
       {/* Door frame */}
-      <mesh castShadow receiveShadow>
+      <mesh >
         <boxGeometry args={[size[0] + 0.1, size[1] + 0.05, depth]} />
         <meshStandardMaterial color="#222222" roughness={0.4} metalness={0.2} />
       </mesh>
       {/* Door panel itself (simulated slightly open or just a solid block) */}
-      <mesh position={[0, 0, 0.01]} castShadow receiveShadow>
+      <mesh position={[0, 0, 0.01]} >
         <boxGeometry args={[size[0], size[1], depth - 0.02]} />
         <meshStandardMaterial color="#4a3b2c" roughness={0.7} />
       </mesh>
@@ -213,13 +213,16 @@ export default function Room() {
       <mesh
         rotation={[-Math.PI / 2, 0, 0]}
         position={[0, 0, 0]}
-        receiveShadow
+
       >
         <planeGeometry args={[width, depth]} />
         <meshStandardMaterial
           color={floorColor}
           roughness={0.7}
           metalness={0.05}
+          envMapIntensity={0.6}
+          clearcoat={0.18}
+          clearcoatRoughness={0.42}
           side={THREE.DoubleSide}
         />
       </mesh>
@@ -228,6 +231,12 @@ export default function Room() {
       <mesh position={[0, height, 0]} rotation={[Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry args={[width, depth]} />
         <meshStandardMaterial color={ceilingColor} roughness={0.85} side={THREE.DoubleSide} />
+      </mesh>
+
+      {/* Recessed ceiling cove gives the room a finished architectural edge. */}
+      <mesh position={[0, height - 0.055, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[width - 0.16, depth - 0.16]} />
+        <meshStandardMaterial color={ceilingColor} roughness={0.72} metalness={0.02} />
       </mesh>
 
       {/* Back Wall (Z-) */}
@@ -261,6 +270,12 @@ export default function Room() {
       {/* Windows and Doors */}
       {windowMeshes}
       {doorMeshes}
+
+      {/* Soft recessed floor inset adds a subtle junction shadow. */}
+      <mesh position={[0, 0.018, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+        <planeGeometry args={[Math.max(width - 0.08, 0.1), Math.max(depth - 0.08, 0.1)]} />
+        <meshStandardMaterial color={floorColor} roughness={0.82} metalness={0.02} transparent opacity={0.32} />
+      </mesh>
 
       {/* Baseboard trim */}
       <mesh position={[0, 0.04, -hd + 0.005]} receiveShadow>

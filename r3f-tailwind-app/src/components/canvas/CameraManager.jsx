@@ -16,7 +16,7 @@ export default function CameraManager() {
   const cameraMode = useStore((s) => s.cameraMode);
   const { camera } = useThree();
   const isTransitioning = useRef(false);
-  const targetPosition = useRef(new THREE.Vector3(8, 6, 8));
+  const targetPosition = useRef(new THREE.Vector3(8.8, 6.6, 8.8));
   const prevMode = useRef(cameraMode);
 
   useEffect(() => {
@@ -44,6 +44,8 @@ export default function CameraManager() {
       camera.position.copy(targetPosition.current);
       isTransitioning.current = false;
     }
+
+    camera.lookAt(0, 1.05, 0);
   });
 
   return null;
