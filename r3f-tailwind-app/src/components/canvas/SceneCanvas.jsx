@@ -5,6 +5,7 @@
  * controls, grid, measurements, and camera management.
  */
 import React, { Suspense } from 'react';
+import * as THREE from 'three';
 import { Canvas } from '@react-three/fiber';
 import { ContactShadows } from '@react-three/drei';
 import Room from './Room';
@@ -19,11 +20,25 @@ import useStore from '../../store/useStore';
 
 function SceneFallback() {
   return (
-    <mesh>
-      <sphereGeometry args={[0.5, 16, 16]} />
-      <meshStandardMaterial color="#6366f1" wireframe />
+    <mesh position={[0, 0.75, 0]}>
+      <boxGeometry args={[1.2, 1.2, 1.2]} />
+      <meshStandardMaterial color="#36d6c3" wireframe transparent opacity={0.7} />
     </mesh>
   );
+}
+
+function SceneErrorBoundary({ children }) {
+  const [hasError, setHasError] = React.useState(false);
+
+  React.useEffect(() => {
+    const handleError = (event) => {
+      if (event?.message?.toLowerCase?.().includes('could not load')) setHasError(true);
+    };
+    window.addEventListener('error', handleError);
+    return () => window.removeEventListener('error', handleError);
+  }, []);
+
+  return hasError ? <SceneFallback /> : children;
 }
 
 /** Click on empty space to deselect */
@@ -61,13 +76,19 @@ export default function SceneCanvas() {
       }}
       gl={{
         antialias: true,
-        toneMapping: 3, // ACESFilmic
+        toneMapping: THREE.ACESFilmicToneMapping,
         toneMappingExposure: 1.2,
+        outputColorSpace: THREE.SRGBColorSpace,
       }}
       dpr={[1, 2]}
+      onCreated={({ gl }) => {
+        gl.setClearColor('#101318', 0);
+      }}
+      onPointerMissed={() => useStore.getState().clearSelection()}
       style={{ background: 'transparent' }}
     >
-      <Suspense fallback={<SceneFallback />}>
+      <SceneErrorBoundary>
+        <Suspense fallback={<SceneFallback />}>
         <SceneLighting />
         <Room />
         <FurnitureManager />
@@ -77,15 +98,16 @@ export default function SceneCanvas() {
         <DeselectPlane />
 
         {/* Contact shadows for grounding */}
-        <ContactShadows
-          position={[0, 0.01, 0]}
-          opacity={0.4}
-          scale={20}
-          blur={2}
-          far={4}
-          color="#1a1a2e"
-        />
-      </Suspense>
+          <ContactShadows
+            position={[0, 0.01, 0]}
+            opacity={0.4}
+            scale={20}
+            blur={2}
+            far={4}
+            color="#1a1a2e"
+          />
+        </Suspense>
+      </SceneErrorBoundary>
 
       <SceneControls />
       <CameraManager />

@@ -12,6 +12,7 @@ import * as THREE from 'three';
 import useStore from '../../store/useStore';
 import { getFurnitureById } from '../../data/furnitureRegistry';
 import { applySnapping, clampToRoomFootprint } from '../../utils/snapUtils';
+import { getRoomBounds } from '../../utils/roomCoordinates';
 
 export default function SceneControls() {
   const orbitRef = useRef();
@@ -73,6 +74,7 @@ export default function SceneControls() {
 
   // Live-update store while gizmo is being dragged (with boundary clamping)
   const room = useStore((s) => s.room);
+  const roomBounds = useMemo(() => getRoomBounds(room), [room]);
   const selectedDefinition = selectedItem
     ? getFurnitureById(selectedItem.catalogItemId ?? selectedItem.registryId)
     : null;
@@ -85,11 +87,15 @@ export default function SceneControls() {
         snapEnabled,
         gridSize,
         snapHeight,
-        roomWidth: room.width,
-        roomDepth: room.depth,
+        roomWidth: roomBounds.maxX - roomBounds.minX,
+        roomDepth: roomBounds.maxZ - roomBounds.minZ,
       },
     );
-    const halfExtent = selectedItem?.bounds?.halfExtent ?? [0.5, 0, 0.5];
+    const halfExtent = selectedItem?.bounds?.halfExtent ?? [
+      (selectedItem?.bounds?.width ?? 1) / 2,
+      (selectedItem?.bounds?.height ?? 0) / 2,
+      (selectedItem?.bounds?.depth ?? 1) / 2,
+    ];
     const boundedPosition = clampToRoomFootprint(
       position,
       room.width,

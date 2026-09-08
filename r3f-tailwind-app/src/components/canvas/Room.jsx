@@ -208,7 +208,7 @@ export default function Room() {
   }, [doors, width, depth, height, hw, hd, t]);
 
   return (
-    <group>
+    <group userData={{ roomBounds: { width, depth, height }, floorY: 0 }}>
       {/* Floor */}
       <mesh
         rotation={[-Math.PI / 2, 0, 0]}

@@ -34,6 +34,12 @@ function LoadedFurnitureInstance({ item, definition }) {
   const isSelected = selectedIds.includes(item.id);
 
   const { scene } = useGLTF(definition.modelPath);
+  const modelBounds = useMemo(() => {
+    const box = new THREE.Box3().setFromObject(scene);
+    const size = box.getSize(new THREE.Vector3());
+    const center = box.getCenter(new THREE.Vector3());
+    return { size, center };
+  }, [scene]);
 
   const clonedScene = useMemo(() => {
     const clone = scene.clone(true);
@@ -84,7 +90,7 @@ function LoadedFurnitureInstance({ item, definition }) {
   return (
     <group
       ref={ref}
-      userData={{ furnitureId: item.id }}
+      userData={{ furnitureId: item.id, modelBounds: { size: modelBounds.size.toArray(), center: modelBounds.center.toArray() } }}
       position={item.position}
       rotation={item.rotation}
       scale={item.scale}
@@ -101,10 +107,10 @@ function LoadedFurnitureInstance({ item, definition }) {
     >
       <primitive object={clonedScene} />
 
-      {/* Selection outline box */}
+      {/* Selection outline box uses measured native model bounds. */}
       {isSelected && (
-        <mesh>
-          <boxGeometry args={[1, 1, 1]} />
+        <mesh position={[modelBounds.center.x, modelBounds.center.y, modelBounds.center.z]}>
+          <boxGeometry args={[modelBounds.size.x, modelBounds.size.y, modelBounds.size.z]} />
           <meshBasicMaterial
             color="#6366f1"
             wireframe

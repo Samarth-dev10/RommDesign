@@ -95,6 +95,8 @@ const scandinavianBedroom = {
     floorColor: '#d4b896',
     ceilingColor: '#ffffff',
     wallThickness: 0.12,
+    floorY: 0,
+    coordinateSystem: 'centered-xz',
   },
   windows: [
     { wall: 'back', position: 0.5, width: 2.5, height: 1.8, sillHeight: 0.7 },
@@ -137,6 +139,8 @@ const industrialWorkspace = {
     floorColor: '#808080',
     ceilingColor: '#e0e0e0',
     wallThickness: 0.15,
+    floorY: 0,
+    coordinateSystem: 'centered-xz',
   },
   windows: [
     { wall: 'back', position: 0.2, width: 2.5, height: 2.4, sillHeight: 0.4 },
@@ -183,6 +187,8 @@ const modernStudioApartment = {
     floorColor: '#a08060',
     ceilingColor: '#f5f5f5',
     wallThickness: 0.15,
+    floorY: 0,
+    coordinateSystem: 'centered-xz',
   },
   windows: [
     { wall: 'right', position: 0.25, width: 3, height: 2, sillHeight: 0.5 },

@@ -2,6 +2,9 @@
  * Room Utilities — import/export and localStorage persistence.
  */
 import { LOCAL_STORAGE_KEY } from '../constants';
+import { clampPositionToRoom, getRoomBounds } from './roomCoordinates';
+
+export { clampPositionToRoom, getRoomBounds };
 
 /**
  * Export room state as a downloadable JSON file.
