@@ -27,18 +27,22 @@ function SceneFallback() {
   );
 }
 
-function SceneErrorBoundary({ children }) {
-  const [hasError, setHasError] = React.useState(false);
+class SceneErrorBoundary extends React.Component {
+  state = { hasError: false };
 
-  React.useEffect(() => {
-    const handleError = (event) => {
-      if (event?.message?.toLowerCase?.().includes('could not load')) setHasError(true);
-    };
-    window.addEventListener('error', handleError);
-    return () => window.removeEventListener('error', handleError);
-  }, []);
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
 
-  return hasError ? <SceneFallback /> : children;
+  componentDidCatch(error) {
+    if (import.meta.env.DEV) {
+      console.warn('[v0] Scene asset failed to load; showing fallback scene.', error);
+    }
+  }
+
+  render() {
+    return this.state.hasError ? <SceneFallback /> : this.props.children;
+  }
 }
 
 /** Click on empty space to deselect */
