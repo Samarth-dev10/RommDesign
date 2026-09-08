@@ -296,7 +296,7 @@ export default function Sidebar() {
                     <span className="size-6 shrink-0 rounded-sm border border-black/10" style={{ backgroundColor: material.color }} aria-hidden="true" />
                     <span className="min-w-0">
                       <span className="block truncate text-[10px] font-semibold text-slate-700">{material.label}</span>
-                      <span className="block text-[9px] text-slate-400">{material.price ? `+$${material.price.toLocaleString()}` : 'Included'}</span>
+                      <span className="block text-[9px] text-slate-400">{material.price ? `+₹${material.price.toLocaleString('en-IN')}` : 'Included'}</span>
                     </span>
                   </button>
                 );
