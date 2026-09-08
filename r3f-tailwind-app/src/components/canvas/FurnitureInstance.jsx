@@ -17,11 +17,55 @@ export default function FurnitureInstance({ item }) {
     [item.catalogItemId, item.registryId],
   );
 
-  // Keep invalid or legacy catalog entries out of the loader. Passing an empty
-  // URL to GLTFLoader makes Vite return index.html, which then fails as JSON.
-  if (!definition?.modelPath) return null;
+  // Keep invalid or legacy catalog entries visible as a stable primitive so a
+  // malformed asset never breaks selection or transform workflows.
+  if (!definition?.modelPath) return <PrimitiveFurnitureInstance item={item} />;
 
   return <LoadedFurnitureInstance item={item} definition={definition} />;
+}
+
+function PrimitiveFurnitureInstance({ item }) {
+  const selectedIds = useStore((s) => s.selectedIds);
+  const selectFurniture = useStore((s) => s.selectFurniture);
+  const [hovered, setHovered] = useState(false);
+  const isSelected = selectedIds.includes(item.id);
+  const size = item.bounds?.size ?? [1, 1, 1];
+
+  return (
+    <group
+      userData={{ furnitureId: item.id, primitive: true }}
+      position={item.position}
+      rotation={item.rotation}
+      scale={item.scale}
+      onPointerDown={(event) => {
+        if (item.isLocked) return;
+        event.stopPropagation();
+        selectFurniture(item.id, event.shiftKey);
+      }}
+      onPointerOver={(event) => {
+        event.stopPropagation();
+        setHovered(true);
+      }}
+      onPointerOut={() => setHovered(false)}
+    >
+      <mesh castShadow receiveShadow>
+        <boxGeometry args={size} />
+        <meshStandardMaterial
+          color={item.isColliding ? '#ef4444' : hovered || isSelected ? '#36d6c3' : '#64748b'}
+          emissive={item.isColliding ? '#ef4444' : isSelected ? '#36d6c3' : '#000000'}
+          emissiveIntensity={item.isColliding || isSelected ? 0.35 : 0}
+          transparent={item.isLocked}
+          opacity={item.isLocked ? 0.65 : 1}
+        />
+      </mesh>
+      {isSelected && (
+        <mesh>
+          <boxGeometry args={size.map((value) => value + 0.04)} />
+          <meshBasicMaterial color="#36d6c3" wireframe transparent opacity={0.8} />
+        </mesh>
+      )}
+    </group>
+  );
 }
 
 function LoadedFurnitureInstance({ item, definition }) {
@@ -79,13 +123,15 @@ function LoadedFurnitureInstance({ item, definition }) {
 
   const { gl } = useThree();
 
+  useEffect(() => () => {
+    if (gl.domElement.style.cursor === 'pointer') gl.domElement.style.cursor = 'auto';
+  }, [gl]);
+
   const handlePointerDown = (e) => {
     if (item.isLocked) return;
     e.stopPropagation();
     selectFurniture(item.id, e.shiftKey);
   };
-
-  if (!definition) return null;
 
   return (
     <group
@@ -96,6 +142,7 @@ function LoadedFurnitureInstance({ item, definition }) {
       scale={item.scale}
       onPointerDown={handlePointerDown}
       onPointerOver={(e) => {
+        if (item.isLocked) e.stopPropagation();
         e.stopPropagation();
         setHovered(true);
         gl.domElement.style.cursor = 'pointer';
@@ -109,7 +156,10 @@ function LoadedFurnitureInstance({ item, definition }) {
 
       {/* Selection outline box uses measured native model bounds. */}
       {isSelected && (
-        <mesh position={[modelBounds.center.x, modelBounds.center.y, modelBounds.center.z]}>
+          <mesh
+            position={[modelBounds.center.x, modelBounds.center.y, modelBounds.center.z]}
+            raycast={() => null}
+          >
           <boxGeometry args={[modelBounds.size.x, modelBounds.size.y, modelBounds.size.z]} />
           <meshBasicMaterial
             color="#6366f1"
