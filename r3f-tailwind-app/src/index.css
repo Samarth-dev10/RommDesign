@@ -44,8 +44,8 @@ button:focus-visible, select:focus-visible, input:focus-visible {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  height: 2rem;
-  padding: 0 0.7rem;
+  height: 1.9rem;
+  padding: 0 0.62rem;
   border: 1px solid #343631;
   border-radius: 0.45rem;
   background: #1a1b1a;
@@ -75,17 +75,18 @@ button:disabled {
 }
 
 #furniture-sidebar, #inspector-panel {
-  background: #1a1b1a !important;
-  border-color: #343631 !important;
+  background: rgba(26, 27, 26, 0.94) !important;
+  border-color: #30322e !important;
   color: #eee9df;
-  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.24);
+  backdrop-filter: blur(14px);
 }
 
 #furniture-sidebar .bg-white, #inspector-panel .bg-white,
 #furniture-sidebar .bg-slate-50, #inspector-panel .bg-slate-50,
 #furniture-sidebar .bg-slate-50\/80, #inspector-panel .bg-slate-50\/80 {
-  background: #1d232c !important;
-  border-color: #2b333e !important;
+  background: rgba(35, 36, 33, 0.72) !important;
+  border-color: #3a3c36 !important;
 }
 
 #furniture-sidebar .text-slate-900, #inspector-panel .text-slate-900,
@@ -95,11 +96,11 @@ button:disabled {
 
 #furniture-sidebar .text-slate-500, #inspector-panel .text-slate-500,
 #furniture-sidebar .text-slate-400, #inspector-panel .text-slate-400 {
-  color: #8d99a8 !important;
+  color: #9a9a90 !important;
 }
 
 #furniture-sidebar input, #inspector-panel input {
-  background: #101318 !important;
-  border-color: #2b333e !important;
-  color: #edf2f7 !important;
+  background: rgba(16, 17, 16, 0.8) !important;
+  border-color: #343631 !important;
+  color: #eee9df !important;
 }

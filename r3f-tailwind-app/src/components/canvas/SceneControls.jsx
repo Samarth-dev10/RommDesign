@@ -170,7 +170,7 @@ export default function SceneControls() {
         maxDistance={40}
         enableDamping
         dampingFactor={0.08}
-        target={[0, 1.05, 0]}
+        target={[0, 0.75, 0]}
       />
 
       {selectedItem && (

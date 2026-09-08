@@ -37,11 +37,11 @@ export default function Navbar() {
       initial={{ y: -50, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className="flex-none flex items-center gap-4 px-5 bg-[#181918] border-b border-[#343631] z-50 h-14 shadow-[0_8px_24px_rgba(0,0,0,0.24)]" 
+      className="flex-none flex items-center gap-3 px-4 bg-[#181918] border-b border-[#343631] z-50 h-14 shadow-[0_8px_24px_rgba(0,0,0,0.24)]" 
       id="main-navbar"
     >
       {/* Logo & Title */}
-      <div className="flex items-center gap-3 mr-4">
+      <div className="flex items-center gap-3 mr-2">
         <motion.div 
           whileHover={{ rotate: 180 }}
           transition={{ type: "spring", stiffness: 200, damping: 10 }}
@@ -111,11 +111,11 @@ export default function Navbar() {
       </div>
 
       {/* Toggles */}
-      <div className="flex gap-1 bg-[#121313] border border-[#343631] rounded-md p-1 shadow-[0_6px_18px_rgba(0,0,0,0.18)] ml-auto">
+      <div className="flex gap-0.5 bg-[#121313] border border-[#343631] rounded-md p-0.5 shadow-[0_6px_18px_rgba(0,0,0,0.18)] ml-auto">
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className={`flex items-center justify-center w-8 h-7 rounded-lg transition-colors ${snapEnabled ? 'bg-[#c7a66a]/15 text-[#c7a66a] border border-[#c7a66a]/40 shadow-sm' : 'text-[#9a9a90] hover:bg-[#232421] hover:text-[#eee9df] border border-transparent'}`}
+          className={`flex items-center justify-center w-7 h-7 rounded-md transition-colors ${snapEnabled ? 'bg-[#c7a66a]/15 text-[#c7a66a] border border-[#c7a66a]/40 shadow-sm' : 'text-[#9a9a90] hover:bg-[#232421] hover:text-[#eee9df] border border-transparent'}`}
           onClick={toggleSnap}
           title="Toggle Snap"
         >
@@ -124,7 +124,7 @@ export default function Navbar() {
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className={`flex items-center justify-center w-8 h-7 rounded-lg transition-colors ${showGrid ? 'bg-[#c7a66a]/15 text-[#c7a66a] border border-[#c7a66a]/40 shadow-sm' : 'text-[#9a9a90] hover:bg-[#232421] hover:text-[#eee9df] border border-transparent'}`}
+          className={`flex items-center justify-center w-7 h-7 rounded-md transition-colors ${showGrid ? 'bg-[#c7a66a]/15 text-[#c7a66a] border border-[#c7a66a]/40 shadow-sm' : 'text-[#9a9a90] hover:bg-[#232421] hover:text-[#eee9df] border border-transparent'}`}
           onClick={toggleGrid}
           title="Toggle Grid"
         >
@@ -133,7 +133,7 @@ export default function Navbar() {
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className={`flex items-center justify-center w-8 h-7 rounded-lg transition-colors ${showMinimap ? 'bg-[#c7a66a]/15 text-[#c7a66a] border border-[#c7a66a]/40 shadow-sm' : 'text-[#9a9a90] hover:bg-[#232421] hover:text-[#eee9df] border border-transparent'}`}
+          className={`flex items-center justify-center w-7 h-7 rounded-md transition-colors ${showMinimap ? 'bg-[#c7a66a]/15 text-[#c7a66a] border border-[#c7a66a]/40 shadow-sm' : 'text-[#9a9a90] hover:bg-[#232421] hover:text-[#eee9df] border border-transparent'}`}
           onClick={toggleMinimap}
           title="Toggle Minimap"
         >
@@ -142,7 +142,7 @@ export default function Navbar() {
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className={`flex items-center justify-center w-8 h-7 rounded-lg transition-colors ${showMeasurements ? 'bg-[#c7a66a]/15 text-[#c7a66a] border border-[#c7a66a]/40 shadow-sm' : 'text-[#9a9a90] hover:bg-[#232421] hover:text-[#eee9df] border border-transparent'}`}
+          className={`flex items-center justify-center w-7 h-7 rounded-md transition-colors ${showMeasurements ? 'bg-[#c7a66a]/15 text-[#c7a66a] border border-[#c7a66a]/40 shadow-sm' : 'text-[#9a9a90] hover:bg-[#232421] hover:text-[#eee9df] border border-transparent'}`}
           onClick={toggleMeasurements}
           title="Toggle Measurements"
         >
@@ -154,11 +154,11 @@ export default function Navbar() {
       <SaveIndicator />
 
       {/* Actions */}
-      <div className="flex items-center gap-1.5 ml-2 border-l border-slate-200 pl-4">
+      <div className="flex items-center gap-1 ml-2 border-l border-[#343631] pl-3">
         <motion.button
           whileHover={history.length > 0 ? { scale: 1.05 } : {}}
           whileTap={history.length > 0 ? { scale: 0.95 } : {}}
-          className={`flex items-center justify-center w-8 h-8 rounded-lg transition-colors ${history.length > 0 ? 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-sm cursor-pointer' : 'bg-transparent border border-transparent text-slate-400 opacity-40 cursor-not-allowed'}`}
+          className={`flex items-center justify-center w-7 h-7 rounded-md transition-colors ${history.length > 0 ? 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-sm cursor-pointer' : 'bg-transparent border border-transparent text-slate-400 opacity-40 cursor-not-allowed'}`}
           onClick={undo}
           disabled={history.length === 0}
           title="Undo (Ctrl+Z)"
@@ -169,7 +169,7 @@ export default function Navbar() {
         <motion.button
           whileHover={future.length > 0 ? { scale: 1.05 } : {}}
           whileTap={future.length > 0 ? { scale: 0.95 } : {}}
-          className={`flex items-center justify-center w-8 h-8 rounded-lg transition-colors ${future.length > 0 ? 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-sm cursor-pointer' : 'bg-transparent border border-transparent text-slate-400 opacity-40 cursor-not-allowed'}`}
+          className={`flex items-center justify-center w-7 h-7 rounded-md transition-colors ${future.length > 0 ? 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-sm cursor-pointer' : 'bg-transparent border border-transparent text-slate-400 opacity-40 cursor-not-allowed'}`}
           onClick={redo}
           disabled={future.length === 0}
           title="Redo (Ctrl+Y)"

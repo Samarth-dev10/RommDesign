@@ -23,8 +23,8 @@ export const CAMERA_MODES = {
   perspective: {
     label: 'Perspective',
     icon: '🎥',
-    position: [8.8, 6.6, 8.8],
-    target: [0, 1.05, 0],
+    position: [10.8, 8.2, 10.8],
+    target: [0, 0.75, 0],
     fov: 46,
   },
   top: {

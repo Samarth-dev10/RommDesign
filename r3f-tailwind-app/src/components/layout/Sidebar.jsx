@@ -78,14 +78,14 @@ function FurnitureCard({ item, index }) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05, duration: 0.2 }}
-      className="group relative w-[calc(50%-6px)] aspect-square shrink-0 bg-white border border-slate-200 rounded-xl cursor-pointer transition-all duration-300 overflow-hidden flex flex-col hover:border-indigo-400 hover:shadow-[0_8px_24px_rgba(79,70,229,0.12)] hover:-translate-y-1"
+      className="group relative w-[calc(50%-5px)] aspect-square shrink-0 bg-white border border-slate-200 rounded-md cursor-pointer transition-all duration-300 overflow-hidden flex flex-col hover:border-[#c7a66a] hover:shadow-[0_8px_22px_rgba(199,166,106,0.16)] hover:-translate-y-0.5"
       onClick={handleClick}
       title={`Click to add ${item.name} or drag into room`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       {...dragProps}
     >
-      <div className="flex-1 flex items-center justify-center bg-linear-to-b from-slate-50 to-slate-100/50 relative overflow-hidden">
+      <div className="flex-1 flex items-center justify-center bg-[#e9e6df] relative overflow-hidden">
         {isHovered && isCatalogAssetReady(item) ? (
           <PreviewCanvas modelPath={item.modelPath} />
         ) : (
@@ -94,8 +94,8 @@ function FurnitureCard({ item, index }) {
           </span>
         )}
       </div>
-      <div className="py-2 px-2 h-7 shrink-0 flex items-center justify-center bg-white border-t border-slate-100">
-        <span className="text-[10px] font-bold text-slate-700 block overflow-hidden text-ellipsis whitespace-nowrap text-center w-full">{item.name}</span>
+      <div className="py-1.5 px-2 h-7 shrink-0 flex items-center justify-center bg-[#f4f1ea] border-t border-slate-200">
+        <span className="text-[10px] font-medium text-slate-700 block overflow-hidden text-ellipsis whitespace-nowrap text-center w-full">{item.name}</span>
       </div>
       <button
         className={`absolute top-1 right-1 bg-white/80 text-slate-400 text-xs py-0.5 px-1 rounded transition-all backdrop-blur-[2px] opacity-0 group-hover:opacity-100 hover:text-amber-500 z-20 shadow-sm ${isFavorite ? 'text-amber-500! opacity-100!' : ''}`}
@@ -166,23 +166,23 @@ export default function Sidebar() {
       initial={{ x: -50, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className="w-80 flex-none flex flex-col bg-white border-r border-slate-200/60 shadow-[4px_0_24px_rgba(0,0,0,0.02)] overflow-hidden z-40" 
+      className="w-64 flex-none flex flex-col bg-white border-r border-slate-200/60 shadow-[4px_0_24px_rgba(0,0,0,0.02)] overflow-hidden z-40" 
       id="furniture-sidebar"
     >
       <div className="pt-5 px-4 pb-0 shrink-0">
         <h2 className="text-sm font-extrabold text-slate-900 mb-4 tracking-tight">Furniture Library</h2>
-        <div className="flex gap-1 bg-slate-50/80 border border-slate-200/60 rounded-xl p-1 mb-4 shadow-sm relative">
+        <div className="flex gap-1 bg-slate-100/70 border border-slate-200/60 rounded-md p-0.5 mb-4 shadow-sm relative">
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              className={`relative flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs transition-colors whitespace-nowrap z-10 ${activeTab === tab.id ? 'text-indigo-600 font-bold' : 'text-slate-500 font-medium hover:text-slate-900'}`}
+              className={`relative flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs transition-colors whitespace-nowrap z-10 ${activeTab === tab.id ? 'text-slate-900 font-semibold' : 'text-slate-500 font-medium hover:text-slate-900'}`}
               onClick={() => setActiveTab(tab.id)}
             >
               <span>{tab.icon}</span> {tab.label}
               {activeTab === tab.id && (
                 <motion.div
                   layoutId="activeTab"
-                  className="absolute inset-0 bg-white rounded-lg shadow-[0_2px_8px_rgba(0,0,0,0.06)] border border-slate-100 -z-10"
+                  className="absolute inset-0 bg-white rounded-md shadow-[0_2px_8px_rgba(0,0,0,0.06)] border border-slate-200 -z-10"
                   transition={{ type: "spring", stiffness: 300, damping: 25 }}
                 />
               )}
@@ -201,7 +201,7 @@ export default function Sidebar() {
               <button
                 key={cat.id}
                 className={`flex items-center gap-1.5 border py-1.5 px-3 rounded-full transition-all whitespace-nowrap snap-start shrink-0 ${
-                  selectedCategory === cat.id ? 'bg-indigo-50 border-indigo-200 text-indigo-700 font-bold shadow-sm' : 'bg-white border-slate-200 text-slate-500 font-medium hover:bg-slate-50 hover:text-slate-900'
+                  selectedCategory === cat.id ? 'bg-slate-800 border-slate-800 text-white font-semibold shadow-sm' : 'bg-white border-slate-200 text-slate-500 font-medium hover:bg-slate-50 hover:text-slate-900'
                 }`}
                 onClick={() => setSelectedCategory(cat.id)}
                 title={cat.label}
