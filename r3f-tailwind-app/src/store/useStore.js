@@ -48,7 +48,7 @@ function createInitialState() {
   return {
     // ── Room & Template ──────────────────────────
     currentTemplate: DEFAULT_TEMPLATE,
-      room: { ...template.room, floorMaterial: template.room.floorMaterial || 'oakNatural' },
+      room: { ...template.room, floorMaterial: template.room.floorMaterial || 'oakNatural', wallMaterial: template.room.wallMaterial || 'warmPaint' },
       windows: template.windows,
     doors: template.doors,
     furniture: normalizeFurniture(template.furniture),
@@ -115,7 +115,7 @@ const useStore = create((set, get) => ({
     if (!template) return;
     set({
       currentTemplate: templateId,
-    room: { ...template.room, floorMaterial: template.room.floorMaterial || 'oakNatural' },
+    room: { ...template.room, floorMaterial: template.room.floorMaterial || 'oakNatural', wallMaterial: template.room.wallMaterial || 'warmPaint' },
       windows: template.windows,
       doors: template.doors,
       furniture: normalizeFurniture(template.furniture),

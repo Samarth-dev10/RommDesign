@@ -154,6 +154,16 @@ export const FLOORING_MATERIALS = {
 
 export const FLOORING_MATERIAL_OPTIONS = Object.keys(FLOORING_MATERIALS);
 
+export const WALL_MATERIALS = {
+  warmPaint: { label: 'Warm Paint', subtitle: 'Soft mineral white', color: '#d8d2c6', roughness: 0.82, metalness: 0.01, finish: 'Matte' },
+  plaster: { label: 'Plaster', subtitle: 'Hand-finished lime', color: '#c9c1b4', roughness: 0.9, metalness: 0.005, finish: 'Matte' },
+  concrete: { label: 'Concrete', subtitle: 'Quiet architectural grey', color: '#a8a69f', roughness: 0.76, metalness: 0.02, finish: 'Satin' },
+  stone: { label: 'Stone', subtitle: 'Natural limestone', color: '#b5aa98', roughness: 0.86, metalness: 0.01, finish: 'Matte' },
+  wallpaper: { label: 'Wallpaper', subtitle: 'Textured linen neutral', color: '#cfc8ba', roughness: 0.74, metalness: 0.005, finish: 'Satin' },
+};
+
+export const WALL_MATERIAL_OPTIONS = Object.keys(WALL_MATERIALS);
+
 // ─── Snap Settings ──────────────────────────────────────────
 export const GRID_SIZES = [
   { value: 0.05, label: '5 cm' },
