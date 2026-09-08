@@ -5,7 +5,6 @@
  * environment mapping based on the active preset.
  */
 import React, { useMemo } from 'react';
-import { Environment } from '@react-three/drei';
 import useStore from '../../store/useStore';
 import { LIGHT_PRESETS } from '../../constants';
 
@@ -115,8 +114,6 @@ export default function SceneLighting() {
         );
       })}
 
-      {/* Environment light is used for reflections and soft ambient fill. */}
-      <Environment preset={config.environment} blur={0.72} />
     </>
   );
 }
