@@ -280,6 +280,10 @@ const useStore = create((set, get) => ({
   // ═══════════════════════════════════════════════
 
   setLightPreset: (preset) => set({ lightPreset: preset }),
+  setRoomAppearance: (updates) =>
+    set((state) => ({
+      room: { ...state.room, ...updates },
+    })),
 
   // ═══════════════════════════════════════════════
   // Snapping
@@ -435,7 +439,7 @@ const useStore = create((set, get) => ({
         : [...state.favorites, registryId],
     })),
 
-  // ═���═════════════════════════════════════════════
+  // ═���════��════════════════════════════════════════
   // UI Toggles
   // ═══════════════════════════════════════════════
 

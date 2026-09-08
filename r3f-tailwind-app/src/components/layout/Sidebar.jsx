@@ -17,6 +17,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { useGLTF, Environment, Center } from '@react-three/drei';
 import { Suspense, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronDown, Palette, Sun } from 'lucide-react';
 
 function SpinningModel({ modelPath }) {
   const { scene } = useGLTF(modelPath);
@@ -121,6 +122,11 @@ export default function Sidebar() {
   const favorites = useStore((s) => s.favorites);
   const recentlyUsed = useStore((s) => s.recentlyUsed);
   const [activeTab, setActiveTab] = useState('browse');
+  const [appearanceOpen, setAppearanceOpen] = useState(true);
+  const room = useStore((s) => s.room);
+  const setRoomAppearance = useStore((s) => s.setRoomAppearance);
+  const lightPreset = useStore((s) => s.lightPreset);
+  const setLightPreset = useStore((s) => s.setLightPreset);
 
   // Filter furniture based on search + category
   const filteredItems = useMemo(() => {
@@ -262,6 +268,42 @@ export default function Sidebar() {
           )}
         </div>
       )}
+
+      <div className="shrink-0 border-t border-slate-100 bg-slate-50/50">
+        <button
+          className="flex w-full items-center justify-between px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-indigo-600"
+          onClick={() => setAppearanceOpen((open) => !open)}
+          aria-expanded={appearanceOpen}
+        >
+          <span className="flex items-center gap-2"><Palette className="size-3.5" aria-hidden="true" /> Room Appearance</span>
+          <ChevronDown className={`size-3.5 transition-transform ${appearanceOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
+        </button>
+        {appearanceOpen && (
+          <div className="grid grid-cols-3 gap-2 px-4 pb-3">
+            {[['Wall', 'wallColor'], ['Floor', 'floorColor'], ['Ceiling', 'ceilingColor']].map(([label, key]) => (
+              <label key={key} className="flex cursor-pointer flex-col gap-1 text-[10px] font-semibold text-slate-500">
+                <span>{label}</span>
+                <input
+                  type="color"
+                  value={room[key] || '#ffffff'}
+                  onChange={(event) => setRoomAppearance({ [key]: event.target.value })}
+                  className="h-7 w-full cursor-pointer rounded-md border border-slate-200 bg-white p-0.5"
+                  aria-label={`${label} color`}
+                />
+              </label>
+            ))}
+            <label className="col-span-3 flex items-center justify-between gap-2 text-[10px] font-semibold text-slate-500">
+              <span className="flex items-center gap-1.5"><Sun className="size-3.5" aria-hidden="true" /> Lighting</span>
+              <select value={lightPreset} onChange={(event) => setLightPreset(event.target.value)} className="rounded-md border border-slate-200 bg-white px-2 py-1 text-[10px] font-bold text-slate-700">
+                <option value="day">Daylight</option>
+                <option value="warm">Warm</option>
+                <option value="studio">Studio</option>
+                <option value="night">Night</option>
+              </select>
+            </label>
+          </div>
+        )}
+      </div>
 
       {/* Item count */}
       <div className="py-3 px-4 border-t border-slate-100 bg-slate-50/50 text-xs font-medium text-slate-500 shrink-0 flex justify-center">

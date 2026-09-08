@@ -224,6 +224,12 @@ export default function Room() {
         />
       </mesh>
 
+      {/* Ceiling */}
+      <mesh position={[0, height, 0]} rotation={[Math.PI / 2, 0, 0]} receiveShadow>
+        <planeGeometry args={[width, depth]} />
+        <meshStandardMaterial color={ceilingColor} roughness={0.85} side={THREE.DoubleSide} />
+      </mesh>
+
       {/* Back Wall (Z-) */}
       <Wall
         position={[0, hh, -hd - t / 2]}

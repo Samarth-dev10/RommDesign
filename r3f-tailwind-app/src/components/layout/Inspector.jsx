@@ -42,6 +42,7 @@ export default function Inspector() {
     (e) => {
       if (!selectedItem) return;
       const val = clampScale(parseFloat(e.target.value));
+      if (selectedItem.isLocked) return;
       updateFurnitureWithHistory(selectedItem.id, { scale: [val, val, val] });
     },
     [selectedItem, updateFurnitureWithHistory]
@@ -241,6 +242,7 @@ export default function Inspector() {
               <span className="font-mono font-bold text-blue-600 bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-md">
                 {currentScale.toFixed(2)}×
               </span>
+              {selectedItem.isLocked && <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600">Locked</span>}
             </div>
             <input
               type="range"
@@ -249,6 +251,7 @@ export default function Inspector() {
               max="5"
               step="0.05"
               value={currentScale}
+              disabled={selectedItem.isLocked}
               onChange={handleScaleSliderChange}
             />
           </div>
