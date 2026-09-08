@@ -173,9 +173,13 @@ const useStore = create((set, get) => ({
 
   updateFurniture: (id, updates) => {
     set((state) => ({
-      furniture: state.furniture.map((item) =>
-        item.id === id ? normalizeFurnitureItem({ ...item, ...updates }) : item,
-      ),
+      furniture: state.furniture.map((item) => {
+        if (item.id !== id) return item;
+        const safeUpdates = item.isLocked
+          ? Object.fromEntries(Object.entries(updates).filter(([key]) => !['position', 'rotation', 'scale'].includes(key)))
+          : updates;
+        return normalizeFurnitureItem({ ...item, ...safeUpdates });
+      }),
     }));
   },
 
@@ -194,10 +198,12 @@ const useStore = create((set, get) => ({
 
   /** Update furniture and push to history (for completed transforms). */
   updateFurnitureWithHistory: (id, updates) => {
+    const item = get().furniture.find((entry) => entry.id === id);
+    if (!item || item.isLocked) return;
     get()._pushHistory();
     set((state) => ({
-      furniture: state.furniture.map((item) =>
-        item.id === id ? normalizeFurnitureItem({ ...item, ...updates }) : item,
+      furniture: state.furniture.map((entry) =>
+        entry.id === id ? normalizeFurnitureItem({ ...entry, ...updates }) : entry,
       ),
     }));
   },
@@ -429,7 +435,7 @@ const useStore = create((set, get) => ({
         : [...state.favorites, registryId],
     })),
 
-  // ═══════════════════════════════════════════════
+  // ═���═════════════════════════════════════════════
   // UI Toggles
   // ═══════════════════════════════════════════════
 

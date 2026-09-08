@@ -90,7 +90,7 @@ function LoadedFurnitureInstance({ item, definition }) {
   return (
     <group
       ref={ref}
-      userData={{ furnitureId: item.id, modelBounds: { size: modelBounds.size.toArray(), center: modelBounds.center.toArray() } }}
+      userData={{ furnitureId: item.id, collisionProxy: true, modelBounds: { size: modelBounds.size.toArray(), center: modelBounds.center.toArray() } }}
       position={item.position}
       rotation={item.rotation}
       scale={item.scale}

@@ -16,13 +16,26 @@ export default function CollisionAdvisoryEngine() {
 
   useFrame(() => {
     const placedObjects = [];
+    const activeIds = new Set();
     scene.traverse((object) => {
-      if (!object.isGroup || !object.userData?.furnitureId || !object.visible) return;
+      if (
+        !object.isGroup ||
+        !object.userData?.furnitureId ||
+        !object.visible ||
+        object.userData?.collisionProxy === false ||
+        object.userData?.selectionOutline
+      ) return;
       const box = new THREE.Box3().setFromObject(object);
       if (box.isEmpty()) return;
-      placedObjects.push({ id: object.userData.furnitureId, box });
-      boxes.current.set(object.userData.furnitureId, box);
+      const id = object.userData.furnitureId;
+      activeIds.add(id);
+      placedObjects.push({ id, box });
+      boxes.current.set(id, box);
     });
+
+    for (const id of boxes.current.keys()) {
+      if (!activeIds.has(id)) boxes.current.delete(id);
+    }
 
     const collisionIds = new Set();
     for (let index = 0; index < placedObjects.length; index += 1) {
@@ -36,6 +49,12 @@ export default function CollisionAdvisoryEngine() {
           collisionIds.add(other.id);
         }
       }
+    }
+
+    if (placedObjects.length < 2 && previousSignature.current) {
+      previousSignature.current = '';
+      setCollisionStates([]);
+      return;
     }
 
     const signature = [...collisionIds].sort().join('|');

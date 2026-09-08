@@ -14,6 +14,13 @@ import { getFurnitureById } from '../../data/furnitureRegistry';
 import { applySnapping, clampToRoomFootprint } from '../../utils/snapUtils';
 import { getRoomBounds } from '../../utils/roomCoordinates';
 
+const MIN_SCALE = 0.1;
+const MAX_SCALE = 5;
+
+function clampScale(value) {
+  return Math.min(MAX_SCALE, Math.max(MIN_SCALE, Number.isFinite(value) ? value : 1));
+}
+
 export default function SceneControls() {
   const orbitRef = useRef();
   const transformRef = useRef();
@@ -86,6 +93,16 @@ export default function SceneControls() {
       (selectedItem?.bounds?.height ?? 0) / 2,
       (selectedItem?.bounds?.depth ?? 1) / 2,
     ];
+    if (transformMode === 'scale') {
+      const uniformScale = clampScale(Math.max(obj.scale.x, obj.scale.y, obj.scale.z));
+      obj.scale.setScalar(uniformScale);
+    }
+
+    if (transformMode === 'scale') {
+      const uniformScale = clampScale((obj.scale.x + obj.scale.y + obj.scale.z) / 3);
+      obj.scale.setScalar(uniformScale);
+    }
+
     const position = applySnapping(
       [obj.position.x, obj.position.y, obj.position.z],
       {
@@ -114,7 +131,7 @@ export default function SceneControls() {
     if (!controls) return;
 
     const onChange = () => {
-      if (!selectedItem) return;
+      if (!selectedItem || selectedItem.isLocked) return;
       const obj = targetRef.current;
       constrainTarget(obj);
       updateFurniture(selectedItem.id, {
@@ -125,7 +142,7 @@ export default function SceneControls() {
     };
 
     const onMouseUp = () => {
-      if (!selectedItem) return;
+      if (!selectedItem || selectedItem.isLocked) return;
       const obj = targetRef.current;
       constrainTarget(targetRef.current);
       updateFurnitureWithHistory(selectedItem.id, {
