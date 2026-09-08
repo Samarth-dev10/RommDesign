@@ -33,7 +33,7 @@ const modernLivingRoom = {
     width: 14,
     depth: 10,
     height: 3,
-    wallColor: '#f5f0eb',
+    wallColor: '#8cbe5b',
     floorColor: '#8B7355',
     ceilingColor: '#fafafa',
     wallThickness: 0.15,
