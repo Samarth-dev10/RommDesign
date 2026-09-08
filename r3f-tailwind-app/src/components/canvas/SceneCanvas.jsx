@@ -74,10 +74,10 @@ export default function SceneCanvas() {
       gl={{
         antialias: true,
         toneMapping: THREE.ACESFilmicToneMapping,
-        toneMappingExposure: 1.2,
+        toneMappingExposure: 1.08,
         outputColorSpace: THREE.SRGBColorSpace,
       }}
-      dpr={[1, 2]}
+      dpr={[1, 1.75]}
       onCreated={({ gl }) => {
         gl.setClearColor('#121313', 1);
       }}

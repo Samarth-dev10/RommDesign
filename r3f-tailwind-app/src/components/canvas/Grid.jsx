@@ -22,12 +22,12 @@ export default function Grid() {
       args={[room.width, room.depth]}
       cellSize={cellSize}
       sectionSize={sectionSize}
-      cellColor="#6366f1"
-      sectionColor="#818cf8"
-      cellThickness={0.5}
-      sectionThickness={1}
-      fadeDistance={15}
-      fadeStrength={1}
+      cellColor="#4b4b45"
+      sectionColor="#68675d"
+      cellThickness={0.28}
+      sectionThickness={0.65}
+      fadeDistance={18}
+      fadeStrength={1.2}
       followCamera={false}
       infiniteGrid={false}
     />

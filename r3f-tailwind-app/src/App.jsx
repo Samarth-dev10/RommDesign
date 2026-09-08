@@ -26,12 +26,12 @@ export default function App() {
   const dropTargetProps = useDropTarget();
 
   return (
-    <div className="h-screen w-screen flex flex-col overflow-hidden bg-[#101318] text-slate-100 font-sans antialiased selection:bg-cyan-400/20">
+    <div className="h-screen w-screen flex flex-col overflow-hidden bg-[#121313] text-[#eee9df] font-sans antialiased selection:bg-[#c7a66a]/20">
       <Navbar />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
-        <div className="flex-1 relative overflow-hidden bg-linear-to-br from-slate-100 to-slate-200/50" {...dropTargetProps}>
-          <div className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(circle_at_50%_40%,rgba(45,212,191,0.06),transparent_48%)]" aria-hidden="true" />
+        <div className="flex-1 relative overflow-hidden bg-[#121313]" {...dropTargetProps}>
+          <div className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(ellipse_at_50%_42%,rgba(199,166,106,0.045),transparent_58%)]" aria-hidden="true" />
           <SceneCanvas />
           <Minimap />
         </div>

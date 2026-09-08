@@ -57,14 +57,14 @@ function LoadedFurnitureInstance({ item, definition }) {
     clonedScene.traverse((child) => {
       if (child.isMesh && child.material) {
         if (item.isColliding) {
-          child.material.emissive = new THREE.Color('#ef4444');
-          child.material.emissiveIntensity = 0.75;
+          child.material.emissive = new THREE.Color('#b96b55');
+          child.material.emissiveIntensity = 0.42;
         } else if (isSelected) {
-          child.material.emissive = new THREE.Color('#6366f1');
-          child.material.emissiveIntensity = 0.15;
-        } else if (hovered) {
-          child.material.emissive = new THREE.Color('#06b6d4');
+          child.material.emissive = new THREE.Color('#c7a66a');
           child.material.emissiveIntensity = 0.1;
+        } else if (hovered) {
+          child.material.emissive = new THREE.Color('#d0c5ad');
+          child.material.emissiveIntensity = 0.06;
         } else {
           child.material.emissive = new THREE.Color('#000000');
           child.material.emissiveIntensity = 0;
@@ -114,10 +114,10 @@ function LoadedFurnitureInstance({ item, definition }) {
           >
           <boxGeometry args={[modelBounds.size.x, modelBounds.size.y, modelBounds.size.z]} />
           <meshBasicMaterial
-            color="#6366f1"
+            color="#c7a66a"
             wireframe
             transparent
-            opacity={0.3}
+            opacity={0.16}
           />
         </mesh>
       )}
