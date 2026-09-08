@@ -282,6 +282,19 @@ const useStore = create((set, get) => ({
   toggleSnap: () => set((state) => ({ snapEnabled: !state.snapEnabled })),
   setGridSize: (size) => set({ gridSize: size }),
   setRotationSnap: (snap) => set({ rotationSnap: snap }),
+  rotateSelected: (delta = Math.PI / 2) => {
+    const { selectedIds } = get();
+    if (selectedIds.length === 0) return;
+    get()._pushHistory();
+    set((state) => ({
+      furniture: state.furniture.map((item) => {
+        if (!state.selectedIds.includes(item.id) || item.isLocked) return item;
+        const rotation = [...item.rotation];
+        rotation[1] += delta;
+        return normalizeFurnitureItem({ ...item, rotation });
+      }),
+    }));
+  },
 
   // ═══════════════════════════════════════════════
   // Undo / Redo

@@ -31,6 +31,7 @@ export default function useKeyboardShortcuts() {
         redo,
         selectAll,
         clearSelection,
+        rotateSelected,
       } = useStore.getState();
 
       // Ctrl/Cmd shortcuts
@@ -74,9 +75,10 @@ export default function useKeyboardShortcuts() {
         case 'e':
           setTransformMode('rotate');
           break;
-        case 'r':
-          setTransformMode('rotate');
-          break;
+          case 'r':
+            e.preventDefault();
+            rotateSelected(Math.PI / 2);
+            break;
         case 's':
           setTransformMode('scale');
           break;

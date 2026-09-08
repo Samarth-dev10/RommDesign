@@ -17,55 +17,9 @@ export default function FurnitureInstance({ item }) {
     [item.catalogItemId, item.registryId],
   );
 
-  // Keep invalid or legacy catalog entries visible as a stable primitive so a
-  // malformed asset never breaks selection or transform workflows.
-  if (!definition?.modelPath) return <PrimitiveFurnitureInstance item={item} />;
+  if (!definition?.modelPath) return null;
 
   return <LoadedFurnitureInstance item={item} definition={definition} />;
-}
-
-function PrimitiveFurnitureInstance({ item }) {
-  const selectedIds = useStore((s) => s.selectedIds);
-  const selectFurniture = useStore((s) => s.selectFurniture);
-  const [hovered, setHovered] = useState(false);
-  const isSelected = selectedIds.includes(item.id);
-  const size = item.bounds?.size ?? [1, 1, 1];
-
-  return (
-    <group
-      userData={{ furnitureId: item.id, primitive: true }}
-      position={item.position}
-      rotation={item.rotation}
-      scale={item.scale}
-      onPointerDown={(event) => {
-        if (item.isLocked) return;
-        event.stopPropagation();
-        selectFurniture(item.id, event.shiftKey);
-      }}
-      onPointerOver={(event) => {
-        event.stopPropagation();
-        setHovered(true);
-      }}
-      onPointerOut={() => setHovered(false)}
-    >
-      <mesh castShadow receiveShadow>
-        <boxGeometry args={size} />
-        <meshStandardMaterial
-          color={item.isColliding ? '#ef4444' : hovered || isSelected ? '#36d6c3' : '#64748b'}
-          emissive={item.isColliding ? '#ef4444' : isSelected ? '#36d6c3' : '#000000'}
-          emissiveIntensity={item.isColliding || isSelected ? 0.35 : 0}
-          transparent={item.isLocked}
-          opacity={item.isLocked ? 0.65 : 1}
-        />
-      </mesh>
-      {isSelected && (
-        <mesh>
-          <boxGeometry args={size.map((value) => value + 0.04)} />
-          <meshBasicMaterial color="#36d6c3" wireframe transparent opacity={0.8} />
-        </mesh>
-      )}
-    </group>
-  );
 }
 
 function LoadedFurnitureInstance({ item, definition }) {

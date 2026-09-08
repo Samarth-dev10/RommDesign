@@ -81,6 +81,11 @@ export default function SceneControls() {
 
   const constrainTarget = (obj) => {
     const snapHeight = selectedDefinition?.snapHeight ?? 0;
+    const halfExtent = selectedItem?.bounds?.halfExtent ?? [
+      (selectedItem?.bounds?.width ?? 1) / 2,
+      (selectedItem?.bounds?.height ?? 0) / 2,
+      (selectedItem?.bounds?.depth ?? 1) / 2,
+    ];
     const position = applySnapping(
       [obj.position.x, obj.position.y, obj.position.z],
       {
@@ -91,15 +96,10 @@ export default function SceneControls() {
         roomDepth: roomBounds.maxZ - roomBounds.minZ,
       },
     );
-    const halfExtent = selectedItem?.bounds?.halfExtent ?? [
-      (selectedItem?.bounds?.width ?? 1) / 2,
-      (selectedItem?.bounds?.height ?? 0) / 2,
-      (selectedItem?.bounds?.depth ?? 1) / 2,
-    ];
     const boundedPosition = clampToRoomFootprint(
       position,
-      room.width,
-      room.depth,
+      roomBounds.maxX - roomBounds.minX,
+      roomBounds.maxZ - roomBounds.minZ,
       [halfExtent[0] * Math.abs(obj.scale.x), 0, halfExtent[2] * Math.abs(obj.scale.z)],
     );
     obj.position.set(...boundedPosition);
