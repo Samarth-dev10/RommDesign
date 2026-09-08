@@ -7,7 +7,7 @@
 import React, { useMemo } from 'react';
 import * as THREE from 'three';
 import useStore from '../../store/useStore';
-import { FLOORING_MATERIALS, WALL_MATERIALS } from '../../constants';
+import { FLOORING_MATERIALS, LIGHT_PRESETS, WALL_MATERIALS } from '../../constants';
 
 /** Create a wall mesh. */
 function Wall({ position, size, color, rotation = [0, 0, 0], material = {} }) {
@@ -104,10 +104,12 @@ export default function Room() {
   const room = useStore((s) => s.room);
   const windows = useStore((s) => s.windows);
   const doors = useStore((s) => s.doors);
+  const lightPreset = useStore((s) => s.lightPreset);
 
   const { width, depth, height, wallColor, floorColor, ceilingColor, wallThickness } = room;
   const floorMaterial = FLOORING_MATERIALS[room.floorMaterial] || FLOORING_MATERIALS.oakNatural;
   const wallMaterial = WALL_MATERIALS[room.wallMaterial] || WALL_MATERIALS.warmPaint;
+  const fixtureIntensity = (LIGHT_PRESETS[lightPreset] || LIGHT_PRESETS.midday).directional.intensity > 1 ? 0.46 : 0.24;
   const hw = width / 2;
   const hd = depth / 2;
   const hh = height / 2;
@@ -244,6 +246,20 @@ export default function Room() {
         <planeGeometry args={[width, depth]} />
         <meshStandardMaterial color={ceilingColor} roughness={0.85} side={THREE.DoubleSide} />
       </mesh>
+      <group position={[0, height - 0.025, 0]}>
+        {[-0.32, 0, 0.32].map((x) => (
+          <mesh key={`ceiling-fixture-${x}`} position={[x * width, 0, -depth * 0.14]} rotation={[Math.PI / 2, 0, 0]}>
+            <circleGeometry args={[0.055, 24]} />
+            <meshStandardMaterial
+              color="#fff2d2"
+              emissive="#f0b978"
+              emissiveIntensity={fixtureIntensity}
+              roughness={0.35}
+              metalness={0.08}
+            />
+          </mesh>
+        ))}
+      </group>
 
       {/* Recessed ceiling cove gives the room a finished architectural edge. */}
       <mesh position={[0, height - 0.055, 0]} rotation={[Math.PI / 2, 0, 0]}>

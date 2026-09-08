@@ -11,11 +11,19 @@ import { LIGHT_PRESETS } from '../../constants';
 
 export default function SceneLighting() {
   const lightPreset = useStore((s) => s.lightPreset);
+  const room = useStore((s) => s.room);
+  const windows = useStore((s) => s.windows);
 
   const config = useMemo(
     () => LIGHT_PRESETS[lightPreset] || LIGHT_PRESETS.midday,
     [lightPreset]
   );
+
+  const warmLayer = config.directional.color;
+  const decorativeIntensity = lightPreset === 'night' ? 0.45 : lightPreset === 'evening' || lightPreset === 'goldenHour' ? 0.72 : 0.26;
+  const roomWidth = room?.width || 8;
+  const roomDepth = room?.depth || 6;
+  const roomHeight = room?.height || 3;
 
   const sunPosition = useMemo(() => {
     const { azimuth = 218, elevation = 62 } = config.directional;
@@ -58,6 +66,54 @@ export default function SceneLighting() {
       <hemisphereLight
         args={['#d9e4ec', '#55463a', 0.32]}
       />
+
+      {/* Architectural layer: ceiling wash and quiet perimeter illumination. */}
+      <pointLight
+        position={[0, roomHeight - 0.22, 0]}
+        intensity={decorativeIntensity * 0.9}
+        distance={roomWidth * 1.25}
+        decay={2}
+        color={warmLayer}
+      />
+      <pointLight
+        position={[-roomWidth * 0.34, roomHeight - 0.28, -roomDepth * 0.28]}
+        intensity={decorativeIntensity * 0.55}
+        distance={roomWidth * 0.75}
+        decay={2}
+        color="#fff1d5"
+      />
+      <pointLight
+        position={[roomWidth * 0.3, roomHeight - 0.28, roomDepth * 0.2]}
+        intensity={decorativeIntensity * 0.45}
+        distance={roomWidth * 0.72}
+        decay={2}
+        color="#f6d4a8"
+      />
+
+      {/* Decorative layer: small warm pools suggest recessed fixtures without clutter. */}
+      <pointLight
+        position={[0, roomHeight * 0.78, -roomDepth * 0.42]}
+        intensity={decorativeIntensity * 0.35}
+        distance={roomWidth * 0.7}
+        decay={2}
+        color="#f3c18b"
+      />
+
+      {/* Window bounce layer keeps glazing connected to the active sun preset. */}
+      {windows.slice(0, 4).map((window, index) => {
+        const side = window.wall === 'left' ? [-roomWidth / 2 + 0.2, 0, 0] : window.wall === 'right' ? [roomWidth / 2 - 0.2, 0, 0] : [0, 0, window.wall === 'front' ? roomDepth / 2 - 0.2 : -roomDepth / 2 + 0.2];
+        const y = window.sillHeight + window.height * 0.58;
+        return (
+          <pointLight
+            key={`window-bounce-${index}`}
+            position={[side[0], y, side[2]]}
+            intensity={Math.min(window.width * window.height, 4) * (config.directional.intensity * 0.045)}
+            distance={Math.max(roomWidth, roomDepth) * 0.9}
+            decay={2}
+            color={config.directional.color}
+          />
+        );
+      })}
 
       {/* Environment light is used for reflections and soft ambient fill. */}
       <Environment preset={config.environment} blur={0.72} />
