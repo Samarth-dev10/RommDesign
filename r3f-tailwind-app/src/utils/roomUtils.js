@@ -2,6 +2,9 @@
  * Room Utilities — import/export and localStorage persistence.
  */
 import { LOCAL_STORAGE_KEY } from '../constants';
+import { clampPositionToRoom, getRoomBounds } from './roomCoordinates';
+
+export { clampPositionToRoom, getRoomBounds };
 
 /**
  * Export room state as a downloadable JSON file.
@@ -63,6 +66,9 @@ export function saveToLocalStorage(state) {
       furniture: state.furniture,
       lightPreset: state.lightPreset,
       favorites: state.favorites,
+      showMinimap: state.showMinimap,
+      showMeasurements: state.showMeasurements,
+      showGrid: state.showGrid,
       savedAt: new Date().toISOString(),
     };
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));

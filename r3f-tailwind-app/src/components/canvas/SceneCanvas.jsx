@@ -5,10 +5,12 @@
  * controls, grid, measurements, and camera management.
  */
 import React, { Suspense } from 'react';
+import * as THREE from 'three';
 import { Canvas } from '@react-three/fiber';
 import { ContactShadows } from '@react-three/drei';
 import Room from './Room';
 import FurnitureManager from './FurnitureManager';
+import CollisionAdvisoryEngine from './CollisionAdvisoryEngine';
 import SceneControls from './SceneControls';
 import SceneLighting from './SceneLighting';
 import CameraManager from './CameraManager';
@@ -17,12 +19,25 @@ import MeasurementOverlay from './MeasurementOverlay';
 import useStore from '../../store/useStore';
 
 function SceneFallback() {
-  return (
-    <mesh>
-      <sphereGeometry args={[0.5, 16, 16]} />
-      <meshStandardMaterial color="#6366f1" wireframe />
-    </mesh>
-  );
+  return null;
+}
+
+class SceneErrorBoundary extends React.Component {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error) {
+    if (import.meta.env.DEV) {
+      console.warn('[v0] Scene asset failed to load; showing fallback scene.', error);
+    }
+  }
+
+  render() {
+    return this.state.hasError ? <SceneFallback /> : this.props.children;
+  }
 }
 
 /** Click on empty space to deselect */
@@ -60,30 +75,38 @@ export default function SceneCanvas() {
       }}
       gl={{
         antialias: true,
-        toneMapping: 3, // ACESFilmic
+        toneMapping: THREE.ACESFilmicToneMapping,
         toneMappingExposure: 1.2,
+        outputColorSpace: THREE.SRGBColorSpace,
       }}
       dpr={[1, 2]}
+      onCreated={({ gl }) => {
+        gl.setClearColor('#101318', 0);
+      }}
+      onPointerMissed={() => useStore.getState().clearSelection()}
       style={{ background: 'transparent' }}
     >
-      <Suspense fallback={<SceneFallback />}>
+      <SceneErrorBoundary>
+        <Suspense fallback={<SceneFallback />}>
         <SceneLighting />
         <Room />
         <FurnitureManager />
+        <CollisionAdvisoryEngine />
         <Grid />
         <MeasurementOverlay />
         <DeselectPlane />
 
         {/* Contact shadows for grounding */}
-        <ContactShadows
-          position={[0, 0.01, 0]}
-          opacity={0.4}
-          scale={20}
-          blur={2}
-          far={4}
-          color="#1a1a2e"
-        />
-      </Suspense>
+          <ContactShadows
+            position={[0, 0.01, 0]}
+            opacity={0.4}
+            scale={20}
+            blur={2}
+            far={4}
+            color="#1a1a2e"
+          />
+        </Suspense>
+      </SceneErrorBoundary>
 
       <SceneControls />
       <CameraManager />

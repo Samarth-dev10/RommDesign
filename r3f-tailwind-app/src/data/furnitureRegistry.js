@@ -1303,4 +1303,22 @@ export function searchFurniture(query) {
   return REGISTRY.filter((item) => item.name.toLowerCase().includes(q));
 }
 
-export default REGISTRY;
+export function normalizeCatalogItem(item) {
+  return {
+    ...item,
+    catalogItemId: item.catalogItemId ?? item.catalog_item_id ?? item.id,
+    modelPath: item.modelPath ?? item.model_path ?? null,
+    defaultScale: item.defaultScale ?? [1, 1, 1],
+    defaultRotation: item.defaultRotation ?? [0, 0, 0],
+    snapHeight: Number.isFinite(item.snapHeight) ? item.snapHeight : 0,
+    dimensions: {
+      width: Number(item.dimensions?.width ?? item.width ?? 1),
+      height: Number(item.dimensions?.height ?? item.height ?? 1),
+      depth: Number(item.dimensions?.depth ?? item.depth ?? 1),
+    },
+  };
+}
+
+export const NORMALIZED_REGISTRY = REGISTRY.map(normalizeCatalogItem);
+
+export default NORMALIZED_REGISTRY;

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SaveLayoutRequestDTO",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["items"],
+  "properties": {
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "pos_x", "pos_y", "pos_z", "rot_x", "rot_y", "rot_z", "scale_x", "scale_y", "scale_z", "is_locked", "is_visible", "material_overrides"],
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "pos_x": { "type": "number" },
+          "pos_y": { "type": "number" },
+          "pos_z": { "type": "number" },
+          "rot_x": { "type": "number" },
+          "rot_y": { "type": "number" },
+          "rot_z": { "type": "number" },
+          "scale_x": { "type": "number", "exclusiveMinimum": 0 },
+          "scale_y": { "type": "number", "exclusiveMinimum": 0 },
+          "scale_z": { "type": "number", "exclusiveMinimum": 0 },
+          "is_locked": { "type": "boolean" },
+          "is_visible": { "type": "boolean" },
+          "material_overrides": { "type": ["object", "null"] }
+        }
+      }
+    }
+  }
+}

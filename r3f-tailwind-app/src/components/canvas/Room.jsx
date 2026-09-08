@@ -208,7 +208,7 @@ export default function Room() {
   }, [doors, width, depth, height, hw, hd, t]);
 
   return (
-    <group>
+    <group userData={{ roomBounds: { width, depth, height }, floorY: 0 }}>
       {/* Floor */}
       <mesh
         rotation={[-Math.PI / 2, 0, 0]}
@@ -222,6 +222,12 @@ export default function Room() {
           metalness={0.05}
           side={THREE.DoubleSide}
         />
+      </mesh>
+
+      {/* Ceiling */}
+      <mesh position={[0, height, 0]} rotation={[Math.PI / 2, 0, 0]} receiveShadow>
+        <planeGeometry args={[width, depth]} />
+        <meshStandardMaterial color={ceilingColor} roughness={0.85} side={THREE.DoubleSide} />
       </mesh>
 
       {/* Back Wall (Z-) */}

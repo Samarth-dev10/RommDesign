@@ -41,8 +41,21 @@ export function snapToFloor(position, snapHeight = 0) {
  * Room is centered at origin, so bounds are ±width/2 and ±depth/2.
  */
 export function clampToRoom(position, roomWidth, roomDepth, margin = 0.2) {
-  const halfW = roomWidth / 2 - margin;
-  const halfD = roomDepth / 2 - margin;
+  return clampToRoomFootprint(position, roomWidth, roomDepth, [margin, 0, margin]);
+}
+
+/**
+ * Keep the object's AABB footprint inside the centered room bounds.
+ * footprint is the half extent [x, y, z] in world units.
+ */
+export function clampToRoomFootprint(
+  position,
+  roomWidth,
+  roomDepth,
+  footprint = [0, 0, 0],
+) {
+  const halfW = Math.max(0, roomWidth / 2 - Math.abs(footprint[0]));
+  const halfD = Math.max(0, roomDepth / 2 - Math.abs(footprint[2]));
   return [
     Math.max(-halfW, Math.min(halfW, position[0])),
     position[1],

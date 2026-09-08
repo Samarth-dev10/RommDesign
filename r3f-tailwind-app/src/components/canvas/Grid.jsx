@@ -19,7 +19,7 @@ export default function Grid() {
   return (
     <DreiGrid
       position={[0, 0.005, 0]}
-      args={[room.width + 1, room.depth + 1]}
+      args={[room.width, room.depth]}
       cellSize={cellSize}
       sectionSize={sectionSize}
       cellColor="#6366f1"

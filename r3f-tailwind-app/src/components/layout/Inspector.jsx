@@ -9,6 +9,14 @@ import React, { useCallback } from 'react';
 import useStore from '../../store/useStore';
 import { getFurnitureById } from '../../data/furnitureRegistry';
 import { motion } from 'framer-motion';
+import { AlertTriangle, Copy, Lock, RotateCcw, Trash2, Unlock } from 'lucide-react';
+
+const MIN_SCALE = 0.1;
+const MAX_SCALE = 5;
+
+function clampScale(value) {
+  return Math.min(MAX_SCALE, Math.max(MIN_SCALE, Number.isFinite(value) ? value : MIN_SCALE));
+}
 
 export default function Inspector() {
   const selectedIds = useStore((s) => s.selectedIds);
@@ -27,23 +35,22 @@ export default function Inspector() {
       : null;
 
   const definition = selectedItem
-    ? getFurnitureById(selectedItem.registryId)
+    ? getFurnitureById(selectedItem.catalogItemId)
     : null;
 
   const handleScaleSliderChange = useCallback(
     (e) => {
       if (!selectedItem) return;
-      const val = parseFloat(e.target.value);
-      updateFurnitureWithHistory(selectedItem.id, {
-        scale: [val, val, val],
-      });
+      const val = clampScale(parseFloat(e.target.value));
+      if (selectedItem.isLocked) return;
+      updateFurnitureWithHistory(selectedItem.id, { scale: [val, val, val] });
     },
     [selectedItem, updateFurnitureWithHistory]
   );
 
   const handleToggleLock = useCallback(() => {
     if (!selectedItem) return;
-    updateFurniture(selectedItem.id, { locked: !selectedItem.locked });
+    updateFurniture(selectedItem.id, { isLocked: !selectedItem.isLocked });
   }, [selectedItem, updateFurniture]);
 
   const handleDelete = useCallback(() => {
@@ -103,7 +110,7 @@ export default function Inspector() {
               className="flex items-center justify-center gap-2 bg-slate-50 border border-black/10 text-slate-700 py-2 px-3 rounded-xl text-xs font-bold transition-colors hover:bg-slate-100 hover:border-black/20" 
               onClick={handleDuplicate}
             >
-              <span className="text-sm leading-none">📋</span> Duplicate All
+              <Copy className="size-3.5" aria-hidden="true" /> Duplicate All
             </motion.button>
           </div>
         </div>
@@ -216,15 +223,26 @@ export default function Inspector() {
           </div>
         </div>
 
+        {selectedItem.isColliding && (
+          <div role="alert" className="flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-rose-700 shadow-sm">
+            <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+            <div>
+              <p className="text-xs font-bold">Collision detected</p>
+              <p className="mt-0.5 text-[11px] leading-relaxed text-rose-600">This object overlaps another item. You can still move it freely.</p>
+            </div>
+          </div>
+        )}
+
         {/* Scale Slider */}
         <div className="flex flex-col gap-2">
           <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Scale Tuning</h3>
           <div className="flex flex-col gap-3 bg-slate-50/80 p-3.5 rounded-xl border border-slate-200/60 shadow-sm">
-            <div className="flex justify-between items-center text-xs">
+            <div className="flex items-center justify-between text-xs">
               <span className="font-semibold text-slate-700">Uniform Scale</span>
               <span className="font-mono font-bold text-blue-600 bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-md">
                 {currentScale.toFixed(2)}×
               </span>
+              {selectedItem.isLocked && <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600">Locked</span>}
             </div>
             <input
               type="range"
@@ -233,6 +251,7 @@ export default function Inspector() {
               max="5"
               step="0.05"
               value={currentScale}
+              disabled={selectedItem.isLocked}
               onChange={handleScaleSliderChange}
             />
           </div>
@@ -245,11 +264,11 @@ export default function Inspector() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-200 shadow-sm ${selectedItem.locked ? 'bg-indigo-50 text-indigo-600 border border-indigo-200' : 'bg-white text-slate-400 border border-slate-200 hover:text-slate-600 hover:bg-slate-50'}`}
+              className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-200 shadow-sm ${selectedItem.isLocked ? 'bg-indigo-50 text-indigo-600 border border-indigo-200' : 'bg-white text-slate-400 border border-slate-200 hover:text-slate-600 hover:bg-slate-50'}`}
               onClick={handleToggleLock}
-              title={selectedItem.locked ? 'Unlock' : 'Lock'}
+              title={selectedItem.isLocked ? 'Unlock' : 'Lock'}
             >
-              {selectedItem.locked ? '🔒' : '🔓'}
+              {selectedItem.isLocked ? <Lock className="size-4" aria-hidden="true" /> : <Unlock className="size-4" aria-hidden="true" />}
             </motion.button>
           </div>
           
@@ -260,7 +279,7 @@ export default function Inspector() {
               className="flex-1 flex items-center justify-center gap-1.5 bg-slate-50 border border-slate-200 text-slate-700 py-2 rounded-xl text-xs font-bold transition-colors hover:bg-slate-100 hover:border-slate-300 shadow-sm" 
               onClick={handleDuplicate}
             >
-              <span className="text-sm leading-none">📋</span> Duplicate
+              <Copy className="size-3.5" aria-hidden="true" /> Duplicate
             </motion.button>
             <motion.button 
               whileHover={{ scale: 1.02 }}
@@ -268,7 +287,7 @@ export default function Inspector() {
               className="flex-1 flex items-center justify-center gap-1.5 bg-slate-50 border border-slate-200 text-slate-700 py-2 rounded-xl text-xs font-bold transition-colors hover:bg-slate-100 hover:border-slate-300 shadow-sm" 
               onClick={handleReset}
             >
-              <span className="text-sm leading-none">🔄</span> Reset
+              <RotateCcw className="size-3.5" aria-hidden="true" /> Reset
             </motion.button>
           </div>
           <motion.button 
@@ -277,7 +296,7 @@ export default function Inspector() {
             className="w-full flex items-center justify-center gap-2 bg-rose-50 border border-rose-100 text-rose-600 py-2 rounded-xl text-xs font-bold transition-colors hover:bg-rose-100 hover:text-rose-700 shadow-sm" 
             onClick={handleDelete}
           >
-            <span className="text-sm leading-none">🗑️</span> Delete Object
+            <Trash2 className="size-3.5" aria-hidden="true" /> Delete Object
           </motion.button>
         </div>
       </div>

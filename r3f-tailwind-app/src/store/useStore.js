@@ -7,10 +7,41 @@
 import { create } from 'zustand';
 import { generateId } from '../utils/idUtils';
 import { getFurnitureById } from '../data/furnitureRegistry';
+import { getCatalogFootprint } from '../utils/catalogUtils';
+import { furnitureInstanceToDto } from '../utils/catalogApi';
 import { instantiateTemplate } from '../data/roomTemplates';
 import { MAX_HISTORY_SIZE } from '../constants';
+import { cloneFurnitureState } from '../utils/coordinateTransformers';
 
 const DEFAULT_TEMPLATE = 'modern-living-room';
+const MIN_SCALE = 0.1;
+const MAX_SCALE = 5;
+
+function finiteNumber(value, fallback = 0) {
+  return Number.isFinite(Number(value)) ? Number(value) : fallback;
+}
+
+function normalizeVector(vector, fallback, length = 3) {
+  return Array.from({ length }, (_, index) => finiteNumber(vector?.[index], fallback[index] ?? 0));
+}
+
+function normalizeFurnitureItem(item) {
+  const scale = normalizeVector(item.scale, [1, 1, 1]).map((value) => Math.min(MAX_SCALE, Math.max(MIN_SCALE, value)));
+  return {
+    ...item,
+    catalogItemId: item.catalogItemId ?? item.registryId,
+    position: normalizeVector(item.position, [0, 0, 0]),
+    rotation: normalizeVector(item.rotation, [0, 0, 0]),
+    scale,
+    isLocked: Boolean(item.isLocked ?? item.is_locked ?? item.locked),
+    isVisible: item.isVisible !== false && item.is_visible !== false && item.visible !== false,
+    isColliding: false,
+  };
+}
+
+function normalizeFurniture(items = []) {
+  return items.filter(Boolean).map(normalizeFurnitureItem);
+}
 
 function createInitialState() {
   const template = instantiateTemplate(DEFAULT_TEMPLATE);
@@ -20,7 +51,8 @@ function createInitialState() {
     room: template.room,
     windows: template.windows,
     doors: template.doors,
-    furniture: template.furniture,
+    furniture: normalizeFurniture(template.furniture),
+    lastSavedState: cloneFurnitureState(normalizeFurniture(template.furniture)),
 
     // ── Selection ────────────────────────────────
     selectedIds: [],
@@ -86,8 +118,9 @@ const useStore = create((set, get) => ({
       room: template.room,
       windows: template.windows,
       doors: template.doors,
-      furniture: template.furniture,
+      furniture: normalizeFurniture(template.furniture),
       lightPreset: template.lightPreset || 'day',
+      lastSavedState: cloneFurnitureState(normalizeFurniture(template.furniture)),
       selectedIds: [],
       history: [],
       future: [],
@@ -105,12 +138,14 @@ const useStore = create((set, get) => ({
 
     const newItem = {
       id: generateId(),
-      registryId,
+      catalogItemId: registryId,
       position: [...position],
       rotation: [...definition.defaultRotation],
       scale: [...definition.defaultScale],
-      locked: false,
-      visible: true,
+      bounds: getCatalogFootprint(definition, definition.defaultScale),
+      isLocked: false,
+      isVisible: true,
+      isColliding: false,
     };
 
     // Apply snapHeight
@@ -141,18 +176,37 @@ const useStore = create((set, get) => ({
 
   updateFurniture: (id, updates) => {
     set((state) => ({
-      furniture: state.furniture.map((f) =>
-        f.id === id ? { ...f, ...updates } : f
-      ),
+      furniture: state.furniture.map((item) => {
+        if (item.id !== id) return item;
+        const safeUpdates = item.isLocked
+          ? Object.fromEntries(Object.entries(updates).filter(([key]) => !['position', 'rotation', 'scale'].includes(key)))
+          : updates;
+        return normalizeFurnitureItem({ ...item, ...safeUpdates });
+      }),
     }));
+  },
+
+  setCollisionStates: (collisionIds) => {
+    set((state) => {
+      const nextIds = new Set(collisionIds);
+      let changed = false;
+      const furniture = state.furniture.map((item) => {
+        const isColliding = nextIds.has(item.id);
+        if (item.isColliding !== isColliding) changed = true;
+        return item.isColliding === isColliding ? item : { ...item, isColliding };
+      });
+      return changed ? { furniture } : state;
+    });
   },
 
   /** Update furniture and push to history (for completed transforms). */
   updateFurnitureWithHistory: (id, updates) => {
+    const item = get().furniture.find((entry) => entry.id === id);
+    if (!item || item.isLocked) return;
     get()._pushHistory();
     set((state) => ({
-      furniture: state.furniture.map((f) =>
-        f.id === id ? { ...f, ...updates } : f
+      furniture: state.furniture.map((entry) =>
+        entry.id === id ? normalizeFurnitureItem({ ...entry, ...updates }) : entry,
       ),
     }));
   },
@@ -192,6 +246,7 @@ const useStore = create((set, get) => ({
 
   selectFurniture: (id, additive = false) => {
     set((state) => {
+      if (!state.furniture.some((item) => item.id === id)) return state;
       if (additive) {
         const isSelected = state.selectedIds.includes(id);
         return {
@@ -228,6 +283,10 @@ const useStore = create((set, get) => ({
   // ═══════════════════════════════════════════════
 
   setLightPreset: (preset) => set({ lightPreset: preset }),
+  setRoomAppearance: (updates) =>
+    set((state) => ({
+      room: { ...state.room, ...updates },
+    })),
 
   // ═══════════════════════════════════════════════
   // Snapping
@@ -236,6 +295,19 @@ const useStore = create((set, get) => ({
   toggleSnap: () => set((state) => ({ snapEnabled: !state.snapEnabled })),
   setGridSize: (size) => set({ gridSize: size }),
   setRotationSnap: (snap) => set({ rotationSnap: snap }),
+  rotateSelected: (delta = Math.PI / 2) => {
+    const { selectedIds } = get();
+    if (selectedIds.length === 0) return;
+    get()._pushHistory();
+    set((state) => ({
+      furniture: state.furniture.map((item) => {
+        if (!state.selectedIds.includes(item.id) || item.isLocked) return item;
+        const rotation = [...item.rotation];
+        rotation[1] += delta;
+        return normalizeFurnitureItem({ ...item, rotation });
+      }),
+    }));
+  },
 
   // ═══════════════════════════════════════════════
   // Undo / Redo
@@ -307,6 +379,18 @@ const useStore = create((set, get) => ({
 
   setSaveStatus: (status) => set({ saveStatus: status }),
 
+  markFurnitureSaved: () =>
+    set((state) => ({ lastSavedState: cloneFurnitureState(state.furniture) })),
+
+  revertSceneObjects: () =>
+    set((state) => ({
+      furniture: cloneFurnitureState(state.lastSavedState),
+      selectedIds: [],
+      history: [],
+      future: [],
+      saveStatus: 'idle',
+    })),
+
   exportRoom: () => {
     const { currentTemplate, room, windows, doors, furniture, lightPreset } =
       get();
@@ -316,21 +400,28 @@ const useStore = create((set, get) => ({
       room,
       windows,
       doors,
-      furniture,
-      lightPreset,
-      exportedAt: new Date().toISOString(),
+  furniture: furniture.map(furnitureInstanceToDto),
+  lightPreset,
+  exportedAt: new Date().toISOString(),
     };
   },
 
   importRoom: (data) => {
-    if (!data || !data.furniture) return;
+    if (!data || !Array.isArray(data.furniture)) return;
+    const room = data.room || createInitialState().room;
+    const furniture = normalizeFurniture(data.furniture);
     set({
       currentTemplate: data.currentTemplate || 'custom',
-      room: data.room,
+      room,
       windows: data.windows || [],
       doors: data.doors || [],
-      furniture: data.furniture,
+      furniture,
+      lastSavedState: cloneFurnitureState(furniture),
       lightPreset: data.lightPreset || 'day',
+      favorites: Array.isArray(data.favorites) ? data.favorites : [],
+      showMinimap: data.showMinimap !== false,
+      showMeasurements: data.showMeasurements !== false,
+      showGrid: data.showGrid !== false,
       selectedIds: [],
       history: [],
       future: [],
@@ -344,7 +435,7 @@ const useStore = create((set, get) => ({
 
   // ═══════════════════════════════════════════════
   // Search & Categories
-  // ═══════════════════════════════════════════════
+  // ════════════════════��══════════════════════════
 
   setSearchQuery: (query) => set({ searchQuery: query }),
   setSelectedCategory: (cat) => set({ selectedCategory: cat }),
@@ -355,7 +446,7 @@ const useStore = create((set, get) => ({
         : [...state.favorites, registryId],
     })),
 
-  // ═══════════════════════════════════════════════
+  // ═���════��════════════════════════════════════════
   // UI Toggles
   // ═══════════════════════════════════════════════
 

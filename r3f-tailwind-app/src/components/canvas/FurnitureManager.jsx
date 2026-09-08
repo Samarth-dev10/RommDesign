@@ -23,7 +23,7 @@ export default function FurnitureManager() {
   return (
     <group>
       {furniture.map((item) =>
-        item.visible !== false ? (
+        item.isVisible !== false ? (
           <Suspense key={item.id} fallback={<FurnitureFallback />}>
             <FurnitureInstance item={item} />
           </Suspense>

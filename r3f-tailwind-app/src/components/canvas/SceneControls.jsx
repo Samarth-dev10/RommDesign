@@ -10,6 +10,16 @@ import { OrbitControls, TransformControls } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import useStore from '../../store/useStore';
+import { getFurnitureById } from '../../data/furnitureRegistry';
+import { applySnapping, clampToRoomFootprint } from '../../utils/snapUtils';
+import { getRoomBounds } from '../../utils/roomCoordinates';
+
+const MIN_SCALE = 0.1;
+const MAX_SCALE = 5;
+
+function clampScale(value) {
+  return Math.min(MAX_SCALE, Math.max(MIN_SCALE, Number.isFinite(value) ? value : 1));
+}
 
 export default function SceneControls() {
   const orbitRef = useRef();
@@ -71,26 +81,59 @@ export default function SceneControls() {
 
   // Live-update store while gizmo is being dragged (with boundary clamping)
   const room = useStore((s) => s.room);
+  const roomBounds = useMemo(() => getRoomBounds(room), [room]);
+  const selectedDefinition = selectedItem
+    ? getFurnitureById(selectedItem.catalogItemId ?? selectedItem.registryId)
+    : null;
+
+  const constrainTarget = (obj) => {
+    const snapHeight = selectedDefinition?.snapHeight ?? 0;
+    const halfExtent = selectedItem?.bounds?.halfExtent ?? [
+      (selectedItem?.bounds?.width ?? 1) / 2,
+      (selectedItem?.bounds?.height ?? 0) / 2,
+      (selectedItem?.bounds?.depth ?? 1) / 2,
+    ];
+    if (transformMode === 'scale') {
+      const uniformScale = clampScale(Math.max(obj.scale.x, obj.scale.y, obj.scale.z));
+      obj.scale.setScalar(uniformScale);
+    }
+
+    if (transformMode === 'scale') {
+      const uniformScale = clampScale((obj.scale.x + obj.scale.y + obj.scale.z) / 3);
+      obj.scale.setScalar(uniformScale);
+    }
+
+    const position = applySnapping(
+      [obj.position.x, obj.position.y, obj.position.z],
+      {
+        snapEnabled,
+        gridSize,
+        snapHeight,
+        roomWidth: roomBounds.maxX - roomBounds.minX,
+        roomDepth: roomBounds.maxZ - roomBounds.minZ,
+      },
+    );
+    const boundedPosition = clampToRoomFootprint(
+      position,
+      roomBounds.maxX - roomBounds.minX,
+      roomBounds.maxZ - roomBounds.minZ,
+      [halfExtent[0] * Math.abs(obj.scale.x), 0, halfExtent[2] * Math.abs(obj.scale.z)],
+    );
+    obj.position.set(...boundedPosition);
+
+    // Furniture spins on the floor around its Y axis only.
+    obj.rotation.x = 0;
+    obj.rotation.z = 0;
+  };
 
   useEffect(() => {
     const controls = transformRef.current;
     if (!controls) return;
 
-    const clampToRoom = (obj) => {
-      const hw = room.width / 2 - 0.1;
-      const hd = room.depth / 2 - 0.1;
-      obj.position.x = Math.max(-hw, Math.min(hw, obj.position.x));
-      obj.position.z = Math.max(-hd, Math.min(hd, obj.position.z));
-      if (obj.position.y < 0) obj.position.y = 0;
-      if (obj.position.y > room.height) obj.position.y = room.height;
-    };
-
     const onChange = () => {
-      if (!selectedItem) return;
+      if (!selectedItem || selectedItem.isLocked) return;
       const obj = targetRef.current;
-      if (transformMode === 'translate') {
-        clampToRoom(obj);
-      }
+      constrainTarget(obj);
       updateFurniture(selectedItem.id, {
         position: [obj.position.x, obj.position.y, obj.position.z],
         rotation: [obj.rotation.x, obj.rotation.y, obj.rotation.z],
@@ -99,11 +142,9 @@ export default function SceneControls() {
     };
 
     const onMouseUp = () => {
-      if (!selectedItem) return;
+      if (!selectedItem || selectedItem.isLocked) return;
       const obj = targetRef.current;
-      if (transformMode === 'translate') {
-        clampToRoom(obj);
-      }
+      constrainTarget(targetRef.current);
       updateFurnitureWithHistory(selectedItem.id, {
         position: [obj.position.x, obj.position.y, obj.position.z],
         rotation: [obj.rotation.x, obj.rotation.y, obj.rotation.z],
@@ -117,7 +158,7 @@ export default function SceneControls() {
       controls.removeEventListener('change', onChange);
       controls.removeEventListener('mouseUp', onMouseUp);
     };
-  }, [selectedItem, updateFurniture, updateFurnitureWithHistory, room, transformMode]);
+  }, [selectedItem, updateFurniture, updateFurnitureWithHistory, room, transformMode, snapEnabled, gridSize, selectedDefinition]);
 
   // Compute snap values
   const translationSnap = snapEnabled ? gridSize : null;
