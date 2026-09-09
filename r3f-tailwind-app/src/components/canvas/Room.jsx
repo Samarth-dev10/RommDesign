@@ -5,9 +5,34 @@
  * Walls have cutouts indicated by slightly different colored panels.
  */
 import React, { useMemo } from 'react';
+import { FLOORING_MATERIAL_BY_ID } from '../../data/flooringCatalog';
 import * as THREE from 'three';
 import useStore from '../../store/useStore';
 import { FLOORING_MATERIALS, LIGHT_PRESETS, WALL_MATERIALS } from '../../constants';
+
+function createFloorTexture(pattern, baseColor, scale = 1) {
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = 512;
+  const context = canvas.getContext('2d');
+  context.fillStyle = baseColor;
+  context.fillRect(0, 0, 512, 512);
+  const tile = Math.max(24, 112 / Math.max(0.5, scale));
+  context.strokeStyle = 'rgba(42, 28, 18, 0.22)';
+  context.lineWidth = Math.max(2, tile * 0.035);
+  const drawBoard = (x, y, width, height) => { context.strokeRect(x, y, width, height); };
+  if (pattern === 'Herringbone' || pattern === 'Chevron') {
+    for (let y = -tile * 2; y < 512 + tile * 2; y += tile * 2) for (let x = -tile * 2; x < 512 + tile * 2; x += tile * 2) {
+      context.save(); context.translate(x, y); context.rotate(pattern === 'Chevron' ? Math.PI / 4 : Math.PI / 4); drawBoard(0, 0, tile * 1.8, tile * 0.72); context.restore();
+    }
+  } else if (pattern === 'Hexagon') {
+    const radius = tile * 0.56;
+    for (let row = -2; row < 12; row += 1) for (let col = -2; col < 12; col += 1) { const x = col * radius * 1.72 + (row % 2) * radius * 0.86; const y = row * radius * 1.5; context.beginPath(); for (let i = 0; i < 6; i++) { const angle = Math.PI / 3 * i; context.lineTo(x + radius * Math.cos(angle), y + radius * Math.sin(angle)); } context.closePath(); context.stroke(); }
+  } else {
+    const gap = pattern === 'Large Format' ? tile * 1.55 : pattern === 'Grid' || pattern === 'Stack Bond' ? tile : tile * 0.75;
+    for (let y = -gap; y < 512 + gap; y += gap) for (let x = -gap; x < 512 + gap; x += gap) { const offset = pattern === 'Running Bond' || pattern === 'Diagonal' ? (Math.floor(y / gap) % 2) * gap * 0.5 : 0; drawBoard(x + offset, y, gap * 0.98, gap * 0.98); }
+  }
+  const texture = new THREE.CanvasTexture(canvas); texture.wrapS = texture.wrapT = THREE.RepeatWrapping; texture.repeat.set(2, 2); texture.colorSpace = THREE.SRGBColorSpace; return texture;
+}
 
 /** Create a wall mesh. */
 function Wall({ position, size, color, rotation = [0, 0, 0], material = {} }) {
@@ -108,6 +133,9 @@ export default function Room() {
 
   const { width, depth, height, wallColor, floorColor, ceilingColor, wallThickness } = room;
   const floorMaterial = FLOORING_MATERIALS[room.floorMaterial] || FLOORING_MATERIALS.oakNatural;
+  const catalogMaterial = FLOORING_MATERIAL_BY_ID[room.floorMaterial];
+  const floorPattern = room.floorPattern || 'Straight';
+  const floorTexture = useMemo(() => { if (typeof document === 'undefined') return null; const texture = createFloorTexture(floorPattern, catalogMaterial?.color || floorMaterial.color || floorColor, Number(room.floorPatternScale || 1)); texture.rotation = (Number(room.floorPatternRotation || 0) * Math.PI) / 180; texture.center.set(0.5, 0.5); return texture; }, [floorPattern, catalogMaterial?.color, floorMaterial.color, floorColor, room.floorPatternScale, room.floorPatternRotation]);
   const wallMaterial = WALL_MATERIALS[room.wallMaterial] || WALL_MATERIALS.warmPaint;
   const fixtureIntensity = (LIGHT_PRESETS[lightPreset] || LIGHT_PRESETS.midday).directional.intensity > 1 ? 0.46 : 0.24;
   const hw = width / 2;
@@ -231,7 +259,8 @@ export default function Room() {
       >
         <planeGeometry args={[width, depth]} />
         <meshStandardMaterial
-          color={floorMaterial.color || floorColor}
+          color={catalogMaterial?.color || floorMaterial.color || floorColor}
+          map={floorTexture}
           roughness={floorMaterial.roughness}
           metalness={floorMaterial.metalness}
           envMapIntensity={floorMaterial.pattern === 'tile' ? 0.72 : 0.48}
@@ -303,11 +332,11 @@ export default function Room() {
       {windowMeshes}
       {doorMeshes}
 
-      {/* Soft recessed floor inset adds a subtle junction shadow. */}
-      <mesh position={[0, 0.018, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+      {/* Pattern overlay keeps the selected flooring pattern readable under all lighting presets. */}
+      {floorTexture && <mesh position={[0, 0.022, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry args={[Math.max(width - 0.08, 0.1), Math.max(depth - 0.08, 0.1)]} />
-        <meshStandardMaterial color={floorColor} roughness={0.82} metalness={0.02} transparent opacity={0.32} />
-      </mesh>
+        <meshBasicMaterial map={floorTexture} color="#ffffff" side={THREE.DoubleSide} toneMapped={false} />
+      </mesh>}
 
       {/* Baseboard trim */}
       <mesh position={[0, 0.04, -hd + 0.005]} receiveShadow>

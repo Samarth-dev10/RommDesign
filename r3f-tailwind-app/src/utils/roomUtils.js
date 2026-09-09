@@ -64,6 +64,8 @@ export function saveToLocalStorage(state) {
       windows: state.windows,
       doors: state.doors,
       furniture: state.furniture,
+      structures: state.structures,
+      customTemplates: state.customTemplates,
       lightPreset: state.lightPreset,
       favorites: state.favorites,
       showMinimap: state.showMinimap,
