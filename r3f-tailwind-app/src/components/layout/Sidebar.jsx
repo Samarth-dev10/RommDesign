@@ -4,7 +4,7 @@
  * Contains search bar, category tabs, scrollable furniture grid,
  * favorites and recently used sections. Supports drag-to-add and click-to-add.
  */
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import useStore from '../../store/useStore';
 import REGISTRY, {
   getFurnitureByCategory,
@@ -13,50 +13,9 @@ import REGISTRY, {
 import { CATEGORIES, FLOORING_MATERIAL_OPTIONS, FLOORING_MATERIALS, WALL_MATERIAL_OPTIONS, WALL_MATERIALS } from '../../constants';
 import SearchBar from '../ui/SearchBar';
 import { useDragSource } from '../../hooks/useDragDrop';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { useGLTF, Environment, Center } from '@react-three/drei';
-import { Suspense, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Palette } from 'lucide-react';
 import { isCatalogAssetReady } from '../../utils/catalogUtils';
-
-function SpinningModel({ modelPath }) {
-  const { scene } = useGLTF(modelPath);
-  const ref = useRef();
-  
-  // Clone to avoid mutating original scene (which might be used in the main room)
-  const cloned = useMemo(() => scene.clone(true), [scene]);
-
-  useFrame(() => {
-    if (ref.current) {
-      ref.current.rotation.y += 0.02;
-    }
-  });
-
-  return (
-    <Center>
-      <primitive object={cloned} ref={ref} scale={0.7} />
-    </Center>
-  );
-}
-
-function PreviewCanvas({ modelPath }) {
-  return (
-    <Canvas 
-      camera={{ position: [3, 2, 3], fov: 40 }}
-      gl={{ alpha: true, antialias: false }}
-      dpr={1} // Keep performance high for sidebar
-      style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 10 }}
-    >
-      <ambientLight intensity={1.5} />
-      <directionalLight position={[10, 10, 5]} intensity={1.5} />
-      <Environment preset="city" />
-      <Suspense fallback={null}>
-        <SpinningModel modelPath={modelPath} />
-      </Suspense>
-    </Canvas>
-  );
-}
 
 /** Individual furniture card in the library grid. */
 function FurnitureCard({ item, index }) {
@@ -64,8 +23,6 @@ function FurnitureCard({ item, index }) {
   const favorites = useStore((s) => s.favorites);
   const toggleFavorite = useStore((s) => s.toggleFavorite);
   const isFavorite = favorites.includes(item.id);
-
-  const [isHovered, setIsHovered] = useState(false);
 
   const dragProps = useDragSource(item.id);
 
@@ -81,18 +38,13 @@ function FurnitureCard({ item, index }) {
       className="group relative w-[calc(50%-5px)] aspect-square shrink-0 bg-white border border-slate-200 rounded-md cursor-pointer transition-all duration-300 overflow-hidden flex flex-col hover:border-[#c7a66a] hover:shadow-[0_8px_22px_rgba(199,166,106,0.16)] hover:-translate-y-0.5"
       onClick={handleClick}
       title={`Click to add ${item.name} or drag into room`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       {...dragProps}
     >
       <div className="flex-1 flex items-center justify-center bg-[#e9e6df] relative overflow-hidden">
-        {isHovered && isCatalogAssetReady(item) ? (
-          <PreviewCanvas modelPath={item.modelPath} />
-        ) : (
-          <span className="text-[28px] opacity-70" aria-label={`${item.name} catalog item`}>
-            {getCategoryIcon(item.category)}
-          </span>
-        )}
+        <span className="text-[28px] opacity-70" aria-label={`${item.name} catalog item`}>
+          {getCategoryIcon(item.category)}
+        </span>
+        {isCatalogAssetReady(item) && <span className="absolute bottom-2 rounded-full border border-slate-300 bg-white/80 px-2 py-0.5 text-[8px] uppercase tracking-wider text-slate-500">3D</span>}
       </div>
       <div className="py-1.5 px-2 h-7 shrink-0 flex items-center justify-center bg-[#f4f1ea] border-t border-slate-200">
         <span className="text-[10px] font-medium text-slate-700 block overflow-hidden text-ellipsis whitespace-nowrap text-center w-full">{item.name}</span>
