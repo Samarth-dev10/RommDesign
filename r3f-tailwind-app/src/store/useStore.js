@@ -188,6 +188,7 @@ const useStore = create((set, get) => ({
     get()._pushHistory(); get().updateStructure(id, updates);
   },
   removeStructure: (id) => { if (!get().structures.some((item) => item.id === id)) return; get()._pushHistory(); set((state) => ({ structures: state.structures.filter((item) => item.id !== id), selectedIds: state.selectedIds.filter((selectedId) => selectedId !== id) })); },
+  duplicateStructure: (id) => { const original = get().structures.find((item) => item.id === id); if (!original) return; get()._pushHistory(); const copy = normalizeStructure({ ...JSON.parse(JSON.stringify(original)), id: generateId(), position: [original.position[0] + 0.5, original.position[1], original.position[2] + 0.5], isLocked: false }); set((state) => ({ structures: [...state.structures, copy], selectedIds: [copy.id] })); return copy.id; },
   toggleStructureLock: (id) => set((state) => ({ structures: state.structures.map((item) => item.id === id ? { ...item, isLocked: !item.isLocked } : item) })),
   selectStructure: (id, additive = false) => set((state) => ({ selectedIds: additive ? (state.selectedIds.includes(id) ? state.selectedIds.filter((item) => item !== id) : [...state.selectedIds, id]) : [id] })),
 
@@ -375,7 +376,7 @@ const useStore = create((set, get) => ({
 
   // ═══════════════════════════════════════════════
   // Undo / Redo
-  // ═══════════════════════════════════════════════
+  // ═══════════════════════════════════��═══════════
 
   undo: () => {
     const { history, furniture, structures, room, future } = get();
