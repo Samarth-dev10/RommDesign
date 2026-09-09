@@ -3,7 +3,7 @@ import './App.css';
 
 import Navbar from './components/layout/Navbar';
 import Sidebar from './components/layout/Sidebar';
-import Inspector from './components/layout/Inspector';
+import Inspector, { MovePalette } from './components/layout/Inspector';
 import Toolbar from './components/layout/Toolbar';
 import SceneCanvas from './components/canvas/SceneCanvas';
 import Minimap from './components/ui/Minimap';
@@ -34,12 +34,14 @@ const configSections = [
 ];
 
 function ConfigurationPanel() {
+  const selectedIds = useStore((s) => s.selectedIds);
   const room = useStore((s) => s.room);
   const setRoomAppearance = useStore((s) => s.setRoomAppearance);
   const [activeSection, setActiveSection] = useState('Flooring');
   const [activeTab, setActiveTab] = useState('Materials');
   const [heating, setHeating] = useState(true);
 
+  if (selectedIds.length > 0) return null;
   return (
     <aside className="intelli-config" aria-label="Configuration">
       <div className="intelli-config-head">
@@ -92,6 +94,9 @@ function ConfigurationPanel() {
 }
 
 function WorkspaceOverlay() {
+  const selectedIds = useStore((s) => s.selectedIds);
+  const transformMode = useStore((s) => s.transformMode);
+  const setTransformMode = useStore((s) => s.setTransformMode);
   const lightPreset = useStore((s) => s.lightPreset);
   const history = useStore((s) => s.history);
   const future = useStore((s) => s.future);
@@ -102,7 +107,8 @@ function WorkspaceOverlay() {
   return <>
     <div className="intelli-view-tabs"><button className={view === '3D View' ? 'is-active' : ''} onClick={() => setView('3D View')}>3D View</button><button className={view === 'Apartment Plan' ? 'is-active' : ''} onClick={() => setView('Apartment Plan')}>Apartment Plan</button><button className={view === 'Floor Plan' ? 'is-active' : ''} onClick={() => setView('Floor Plan')}>Floor Plan</button></div>
     <div className="intelli-canvas-actions"><button onClick={undo} disabled={!history.length} aria-label="Undo"><Undo2 size={17} /></button><button onClick={redo} disabled={!future.length} aria-label="Redo"><Redo2 size={17} /></button><button className="sun-action" onClick={() => setLightPreset(lightPreset === 'night' ? 'midday' : 'night')} aria-label="Toggle sunlight"><Sun size={18} /></button><button className="shadow-action">Shadows <ChevronDown size={14} /></button></div>
-    <div className="intelli-tool-rail">{tools.map(({ label, icon: Icon }, index) => <button key={label} className={index === 0 ? 'is-active' : ''}><Icon size={20} strokeWidth={1.6} /><span>{label}</span></button>)}</div>
+    <div className="intelli-tool-rail">{tools.map(({ label, icon: Icon }, index) => { const mode = label === 'Move' ? 'translate' : label === 'Rotate' ? 'rotate' : label === 'Scale' ? 'scale' : null; return <button key={label} className={(mode ? transformMode === mode : index === 0) ? 'is-active' : ''} onClick={() => mode && selectedIds.length === 1 && setTransformMode(mode)}><Icon size={20} strokeWidth={1.6} /><span>{label}</span></button>; })}</div>
+    <MovePalette />
     <div className="intelli-bottom-dock"><button className="is-active"><Sun size={21} /><span>Sunlight</span></button><button><Box size={21} /><span>Camera</span></button><button><Lightbulb size={21} /><span>Environment</span></button><button><Grid2X2 size={21} /><span>Materials</span></button><button><Layers3 size={21} /><span>View Modes</span></button><button><Expand size={21} /><span>Presentation</span></button></div>
     <div className="intelli-zoom"><button>−</button><span>90%</span><button>+</button></div><button className="intelli-fit"><Expand size={15} /> Fit to Screen</button><div className="intelli-view-toggle"><button>2D</button><button className="is-active">3D</button><button aria-label="Fullscreen"><Expand size={15} /></button></div>
   </>;
