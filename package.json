@@ -2,6 +2,7 @@
   "name": "romm-design-deployment",
   "private": true,
   "scripts": {
+    "postinstall": "npm install --prefix r3f-tailwind-app",
     "build": "npm --prefix r3f-tailwind-app run build",
     "dev": "npm --prefix r3f-tailwind-app run dev",
     "start": "npm --prefix r3f-tailwind-app run start"
