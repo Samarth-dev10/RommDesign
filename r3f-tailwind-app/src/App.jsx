@@ -11,7 +11,7 @@ import useKeyboardShortcuts from './hooks/useKeyboardShortcuts';
 import useAutosave from './hooks/useAutosave';
 import { useDropTarget } from './hooks/useDragDrop';
 import useStore from './store/useStore';
-import { FLOORING_MATERIAL_OPTIONS, FLOORING_MATERIALS } from './constants';
+import { FLOORING_MATERIAL_OPTIONS, FLOORING_MATERIALS, WALL_MATERIAL_OPTIONS, WALL_MATERIALS } from './constants';
 import { TEMPLATE_LIST } from './data/roomTemplates';
 import { Box, ChevronDown, ChevronLeft, ChevronRight, Download, Expand, Grid2X2, Home, Layers3, Lightbulb, MousePointer2, Move, RotateCw, Ruler, Save, Settings2, Sun, Undo2, Redo2, X } from 'lucide-react';
 
@@ -67,6 +67,53 @@ function LayoutContent({ room, setRoomAppearance }) {
   </div>;
 }
 
+const WALL_PAINTS = [
+  ['Pure White', '#f4f3ef'], ['Warm White', '#e9e0d2'], ['Ivory', '#ded5c8'], ['Sand Beige', '#cbb9a4'], ['Taupe', '#9d9182'],
+  ['Sage Green', '#9aa991'], ['Olive', '#69725c'], ['Dusty Blue', '#8da0af'], ['Terracotta', '#bd735a'], ['Charcoal', '#3e4141'],
+];
+const WALL_TEXTURES = [
+  ['Carrara Marble', 'linear-gradient(135deg,#f3f1ed 20%,#c9c4bd 22%,#fbfaf7 35%,#d3cdc5 60%,#f7f5f0 62%)', 'Premium'],
+  ['Emperador Stone', 'linear-gradient(135deg,#302b2b,#756457 45%,#242326 70%,#968272)', 'Premium'],
+  ['Travertine', 'repeating-linear-gradient(90deg,#c9b08e 0 16px,#dfc7a3 17px 22px)', 'Premium'],
+  ['Limestone', 'linear-gradient(145deg,#e7e2d9,#bcb8ad 48%,#f2eee5)', 'Premium'],
+  ['Concrete Textured', 'linear-gradient(145deg,#747676,#a8aaa5 45%,#676a69)', 'Modern'],
+  ['Slate Grey', 'linear-gradient(135deg,#303338,#65666b 35%,#25272c 70%,#57585d)', 'Modern'],
+  ['Sandstone', 'linear-gradient(145deg,#b9a187,#d8c1a0 45%,#a78e71)', 'Modern'],
+  ['White Brick', 'repeating-linear-gradient(0deg,#e9e7e2 0 14px,#b9b8b4 15px 16px),repeating-linear-gradient(90deg,transparent 0 27px,#b9b8b4 28px 30px)', 'Modern'],
+  ['Wood Slat', 'repeating-linear-gradient(90deg,#70462d 0 5px,#c18c5c 6px 10px,#4d3023 11px 13px)', 'Modern'],
+  ['Textured Plaster', 'linear-gradient(145deg,#d5cec0,#9e9589 45%,#eee9df)', 'Modern'],
+  ['Fabric Finish', 'repeating-linear-gradient(135deg,#b9b8b2 0 2px,#e1ded7 3px 5px)', 'Modern'],
+  ['Geometric 3D', 'linear-gradient(135deg,#e6e3db 25%,#bcbab5 25% 50%,#eeeae3 50% 75%,#aaa9a7 75%)', 'Modern'],
+];
+
+function WallsContent({ room, setRoomAppearance }) {
+  const [tab, setTab] = useState('Material');
+  const [wallTab, setWallTab] = useState('Material');
+  const [applied, setApplied] = useState(false);
+  const [selectedPaint, setSelectedPaint] = useState('Warm White');
+  const [selectedTexture, setSelectedTexture] = useState('Limestone');
+  const selectedMaterial = room.wallMaterial || 'warmPaint';
+  const apply = (updates) => { setRoomAppearance(updates); setApplied(true); window.setTimeout(() => setApplied(false), 1500); };
+  return <div className="walls-content">
+    <div className="walls-heading"><div><h3>Walls</h3><p>Customize wall materials, height and style</p></div></div>
+    <div className="intelli-tabs walls-tabs">{['Material', 'Paint', 'Textures', 'Properties'].map((item) => <button key={item} className={tab === item ? 'is-active' : ''} onClick={() => setTab(item)}>{item}</button>)}</div>
+    {tab === 'Material' && <>
+      <div className="wall-selection"><div><strong>Wall Selection</strong><select aria-label="Wall selection"><option>Living Room - North Wall</option><option>Living Room - East Wall</option><option>Hallway - South Wall</option></select></div><span className="wall-mini-map">⌂</span></div>
+      <div className="wall-subheading"><strong>Material Library</strong></div><div className="wall-filters">{['All', 'Paint', 'Wallpaper', 'Wood', 'Stone', 'Concrete'].map((filter) => <button key={filter} className={filter === 'All' ? 'is-active' : ''}>{filter}</button>)}</div><input className="wall-search" placeholder="Search wall materials..." />
+      <div className="wall-card-grid">{WALL_MATERIAL_OPTIONS.map((id) => { const item = WALL_MATERIALS[id]; return <button key={id} className={`wall-card ${selectedMaterial === id ? 'is-selected' : ''}`} onClick={() => apply({ wallMaterial: id, wallColor: item.color })}><span className="wall-swatch" style={{ background: item.color }} /><strong>{item.label}</strong><small>{item.finish}</small>{selectedMaterial === id && <b>✓</b>}</button>; })}</div>
+      <div className="wall-subheading wall-quick"><strong>Quick Presets</strong></div><div className="wall-presets">{['Modern', 'Minimal', 'Classic', 'Industrial', 'Scandinavian'].map((preset, index) => <button key={preset} onClick={() => apply({ wallMaterial: index === 0 ? 'warmPaint' : index === 3 ? 'concrete' : 'plaster' })}><span className={`preset-swatch preset-${index}`} /><small>{preset}</small></button>)}</div>
+    </>}
+    {tab === 'Paint' && <PaintWallContent selectedPaint={selectedPaint} setSelectedPaint={setSelectedPaint} apply={apply} />}
+    {tab === 'Textures' && <TextureWallContent selectedTexture={selectedTexture} setSelectedTexture={setSelectedTexture} apply={apply} />}
+    {tab === 'Properties' && <div className="wall-properties"><div className="wall-preview" /><h4>Wall Information</h4><label>Name<input value="North Wall" readOnly /></label><label>Type<select><option>Interior Wall</option></select></label><div className="wall-info-grid"><span>Area<strong>12.96 m²</strong></span><span>Length<strong>4.80 m</strong></span><span>Height<strong>{Number(room.height || 2.7).toFixed(2)} m</strong></span><span>Thickness<strong>{Number(room.wallThickness || 0.2).toFixed(2)} m</strong></span></div><div className="wall-toggle-list"><span>Visible <i className="intelli-switch is-on"><b /></i></span><span>Cast Shadows <i className="intelli-switch is-on"><b /></i></span><span>Collidable <i className="intelli-switch is-on"><b /></i></span></div></div>}
+    <div className="wall-settings"><h4>Wall Settings</h4><label>Wall Height <strong>{Number(room.height || 2.7).toFixed(2)} m</strong><input type="range" min="2.4" max="3.3" step="0.1" value={room.height || 2.7} onChange={(event) => setRoomAppearance({ height: Number(event.target.value) })} /></label><label>Wall Thickness <strong>{Number(room.wallThickness || 0.2).toFixed(2)} m</strong><input type="range" min="0.1" max="0.4" step="0.01" value={room.wallThickness || 0.2} onChange={(event) => setRoomAppearance({ wallThickness: Number(event.target.value) })} /></label></div>
+    <div className="wall-actions"><button className="intelli-apply" onClick={() => apply({})}>{applied ? 'Applied to Wall' : 'Apply to Wall'}</button><button onClick={() => apply({})}>Apply to All Walls</button></div>
+  </div>;
+}
+
+function PaintWallContent({ selectedPaint, setSelectedPaint, apply }) { return <div className="wall-paint-content"><div className="wall-subheading"><strong>Color Palette</strong></div><div className="wall-filters">{['All', 'Neutrals', 'Warm', 'Cool', 'Earth', 'Pastels', 'Dark'].map((filter) => <button key={filter} className={filter === 'All' ? 'is-active' : ''}>{filter}</button>)}</div><input className="wall-search" placeholder="Search colors..." /><div className="paint-grid">{WALL_PAINTS.map(([name, color]) => <button key={name} className={selectedPaint === name ? 'is-selected' : ''} onClick={() => { setSelectedPaint(name); apply({ wallColor: color, wallMaterial: 'warmPaint' }); }}><span style={{ background: color }} /><strong>{name}</strong><small>{color.toUpperCase()}</small></button>)}</div><div className="wall-subheading"><strong>Finish</strong></div><div className="finish-grid">{['Matte', 'Eggshell', 'Satin', 'Semi-Gloss', 'Gloss'].map((finish, index) => <button key={finish} className={index === 0 ? 'is-selected' : ''}><span className={`finish-orb finish-${index}`} /><small>{finish}</small></button>)}</div><div className="wall-preview wide-preview" /></div>; }
+function TextureWallContent({ selectedTexture, setSelectedTexture, apply }) { return <div className="wall-texture-content"><input className="wall-search" placeholder="Search textures (e.g. marble, wood, concrete...)" /><div className="wall-filters">{['All', 'Marble', 'Stone', 'Wood', 'Concrete', 'Fabric', 'Brick'].map((filter) => <button key={filter} className={filter === 'All' ? 'is-active' : ''}>{filter}</button>)}</div><div className="texture-grid">{WALL_TEXTURES.map(([name, background, tier]) => <button key={name} className={selectedTexture === name ? 'is-selected' : ''} onClick={() => { setSelectedTexture(name); apply({ wallMaterial: name === 'Limestone' ? 'stone' : 'wallpaper' }); }}><span style={{ background }} /><strong>{name}</strong><small>{tier}</small>{selectedTexture === name && <b>✓</b>}</button>)}</div><div className="texture-controls"><label>Texture Scale<strong>1.0x</strong><input type="range" min="0.5" max="2" step="0.1" defaultValue="1" /></label><label>Rotation<strong>0°</strong><input type="range" min="0" max="360" step="15" defaultValue="0" /></label></div><div className="wall-preview wide-preview texture-preview" /></div>; }
+
 function ConfigurationPanel() {
   const selectedIds = useStore((s) => s.selectedIds);
   const room = useStore((s) => s.room);
@@ -96,7 +143,7 @@ function ConfigurationPanel() {
           <button className="intelli-config-nav-bottom"><Settings2 size={18} strokeWidth={1.6} /><span>Settings</span></button>
         </nav>
         <div className="intelli-config-content">
-          {activeSection === 'Layout' ? <LayoutContent room={room} setRoomAppearance={setRoomAppearance} /> : <>
+          {activeSection === 'Layout' ? <LayoutContent room={room} setRoomAppearance={setRoomAppearance} /> : activeSection === 'Walls' ? <WallsContent room={room} setRoomAppearance={setRoomAppearance} /> : <>
           <div className="intelli-section-title">
             <div><h3>{activeSection}</h3><p>{activeSection === 'Flooring' ? 'Select material and finish' : 'Configure this layer'}</p></div>
           </div>
