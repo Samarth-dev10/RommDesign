@@ -114,6 +114,59 @@ function WallsContent({ room, setRoomAppearance }) {
 function PaintWallContent({ selectedPaint, setSelectedPaint, apply }) { return <div className="wall-paint-content"><div className="wall-subheading"><strong>Color Palette</strong></div><div className="wall-filters">{['All', 'Neutrals', 'Warm', 'Cool', 'Earth', 'Pastels', 'Dark'].map((filter) => <button key={filter} className={filter === 'All' ? 'is-active' : ''}>{filter}</button>)}</div><input className="wall-search" placeholder="Search colors..." /><div className="paint-grid">{WALL_PAINTS.map(([name, color]) => <button key={name} className={selectedPaint === name ? 'is-selected' : ''} onClick={() => { setSelectedPaint(name); apply({ wallColor: color, wallMaterial: 'warmPaint' }); }}><span style={{ background: color }} /><strong>{name}</strong><small>{color.toUpperCase()}</small></button>)}</div><div className="wall-subheading"><strong>Finish</strong></div><div className="finish-grid">{['Matte', 'Eggshell', 'Satin', 'Semi-Gloss', 'Gloss'].map((finish, index) => <button key={finish} className={index === 0 ? 'is-selected' : ''}><span className={`finish-orb finish-${index}`} /><small>{finish}</small></button>)}</div><div className="wall-preview wide-preview" /></div>; }
 function TextureWallContent({ selectedTexture, setSelectedTexture, apply }) { return <div className="wall-texture-content"><input className="wall-search" placeholder="Search textures (e.g. marble, wood, concrete...)" /><div className="wall-filters">{['All', 'Marble', 'Stone', 'Wood', 'Concrete', 'Fabric', 'Brick'].map((filter) => <button key={filter} className={filter === 'All' ? 'is-active' : ''}>{filter}</button>)}</div><div className="texture-grid">{WALL_TEXTURES.map(([name, background, tier]) => <button key={name} className={selectedTexture === name ? 'is-selected' : ''} onClick={() => { setSelectedTexture(name); apply({ wallMaterial: name === 'Limestone' ? 'stone' : 'wallpaper' }); }}><span style={{ background }} /><strong>{name}</strong><small>{tier}</small>{selectedTexture === name && <b>✓</b>}</button>)}</div><div className="texture-controls"><label>Texture Scale<strong>1.0x</strong><input type="range" min="0.5" max="2" step="0.1" defaultValue="1" /></label><label>Rotation<strong>0°</strong><input type="range" min="0" max="360" step="15" defaultValue="0" /></label></div><div className="wall-preview wide-preview texture-preview" /></div>; }
 
+const FLOORING_PATTERNS = [
+  ['Straight', 'repeating-linear-gradient(90deg,#a8794e 0 32px,#d2a777 33px 36px)'],
+  ['Herringbone', 'linear-gradient(45deg,transparent 45%,#d3a372 46% 54%,transparent 55%),linear-gradient(-45deg,#936743 45%,#d0a172 46% 54%,#8c5e3f 55%)'],
+  ['Chevron', 'repeating-linear-gradient(45deg,#b08357 0 18px,#d4ab7d 19px 22px)'],
+  ['Diagonal', 'repeating-linear-gradient(135deg,#ad7b4e 0 20px,#d5aa7b 21px 25px)'],
+  ['Basket Weave', 'repeating-linear-gradient(0deg,#a97c53 0 13px,#d0a276 14px 20px),repeating-linear-gradient(90deg,transparent 0 25px,#805439 26px 33px)'],
+  ['Parquet', 'repeating-linear-gradient(45deg,#b78b5e 0 18px,#8b5b3c 19px 24px)'],
+  ['Hexagon', 'radial-gradient(circle,#cab497 0 5px,transparent 6px),#777875'],
+  ['Tile Grid', 'repeating-linear-gradient(0deg,#8f918f 0 3px,transparent 4px 32px),repeating-linear-gradient(90deg,#8f918f 0 3px,#c7c5bd 4px 32px)'],
+];
+const FLOORING_EXTENDED = [
+  ['Oak Natural', '#b88857', '$32/m²', 'oakNatural'], ['Oak Grey', '#85877f', '$34/m²', 'oakGrey'], ['Walnut Premium', '#70442f', '$42/m²', 'walnutPremium'], ['Maple Light', '#cba77b', '$28/m²', 'oakNatural'],
+  ['Herringbone Oak', '#a9774d', '$38/m²', 'oakNatural'], ['Marble Carrara', '#d9d5cc', '$56/m²', 'travertine'], ['Travertine', '#c5ad8e', '$48/m²', 'travertine'], ['Concrete Grey', '#898b87', '$30/m²', 'concreteLight'],
+  ['Terrazzo Sand', '#c6b298', '$36/m²', 'travertine'], ['Porcelain Tile', '#a6a7a2', '$40/m²', 'porcelainTile'], ['Slate Black', '#37383a', '$44/m²', 'porcelainTile'], ['Custom', '#555b5b', 'Upload / Select', 'oakNatural'],
+];
+
+function FlooringContent({ room, setRoomAppearance }) {
+  const [tab, setTab] = useState('Materials');
+  const [category, setCategory] = useState('All');
+  const [query, setQuery] = useState('');
+  const [pattern, setPattern] = useState('Herringbone');
+  const [heating, setHeating] = useState(false);
+  const [heatingType, setHeatingType] = useState('Electric');
+  const [temperature, setTemperature] = useState(24);
+  const [applied, setApplied] = useState(false);
+  const apply = (updates = {}) => { setRoomAppearance(updates); setApplied(true); window.setTimeout(() => setApplied(false), 1500); };
+  const current = FLOORING_EXTENDED.find(([name,,, id]) => id === room.floorMaterial) || FLOORING_EXTENDED[0];
+  const filtered = FLOORING_EXTENDED.filter(([name]) => name.toLowerCase().includes(query.toLowerCase()) && (category === 'All' || (category === 'Wood' ? /oak|walnut|maple|herringbone/i.test(name) : category === 'Stone' ? /marble|travertine|slate/i.test(name) : category === 'Tile' ? /tile|terrazzo/i.test(name) : category === 'Concrete' ? /concrete/i.test(name) : true)));
+  return <div className="flooring-content">
+    <div className="flooring-heading"><h3>Flooring</h3><p>Choose materials and finishes for your floor</p></div>
+    <div className="intelli-tabs flooring-tabs">{['Materials', 'Patterns', 'Properties', 'Heating'].map((item) => <button key={item} className={tab === item ? 'is-active' : ''} onClick={() => setTab(item)}>{item}</button>)}</div>
+    {tab === 'Materials' && <>
+      <div className="floor-filters">{['All', 'Wood', 'Tile', 'Stone', 'Concrete', 'Carpet'].map((item) => <button key={item} className={category === item ? 'is-active' : ''} onClick={() => setCategory(item)}>{item}</button>)}</div>
+      <input className="wall-search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search flooring materials..." />
+      <div className="floor-card-grid">{filtered.map(([name, color, price, id]) => <button key={name} className={`floor-card ${room.floorMaterial === id && current[0] === name ? 'is-selected' : ''}`} onClick={() => apply({ floorMaterial: id, floorColor: color })}><span style={{ background: color }} /><strong>{name}</strong><small>{price}</small>{room.floorMaterial === id && current[0] === name && <b>✓</b>}</button>)}</div>
+      <div className="floor-feature"><span style={{ background: current[1] }} /><div><strong>{current[0]}</strong><small>Warm, timeless and versatile</small></div><button>View Details →</button></div>
+    </>}
+    {tab === 'Patterns' && <>
+      <div className="floor-hero-preview pattern-hero"><strong>{pattern} Pattern</strong><small>A timeless pattern that adds elegance and depth to your space.</small></div>
+      <div className="floor-pattern-grid">{FLOORING_PATTERNS.map(([name, background]) => <button key={name} className={pattern === name ? 'is-selected' : ''} onClick={() => { setPattern(name); apply({ floorPattern: name }); }}><span style={{ background }} /><small>{name}</small>{pattern === name && <b>✓</b>}</button>)}</div>
+      <div className="floor-control-grid"><label>Pattern Scale<strong>1.0x</strong><input type="range" min="0.5" max="2" step="0.1" defaultValue="1" /></label><label>Direction<select><option>Auto (Room Orientation)</option><option>North / South</option><option>East / West</option></select></label><label>Rotation<strong>0°</strong><input type="range" min="0" max="360" defaultValue="0" /></label><label>Offset<input value="X 0.00 m   Y 0.00 m" readOnly /></label></div>
+    </>}
+    {tab === 'Properties' && <>
+      <div className="selected-flooring"><span style={{ background: current[1] }} /><div><strong>{current[0]}</strong><small>{pattern} Pattern</small><button onClick={() => setTab('Materials')}>Change Material →</button></div></div>
+      <div className="floor-property-section"><h4>Dimensions</h4><label>Thickness<strong>18 mm</strong><input type="range" min="8" max="30" defaultValue="18" /></label><div className="floor-input-row"><label>Plank Size (L × W)<input value="600 mm" readOnly /></label><span>×</span><input value="120 mm" readOnly /></div></div>
+      <div className="floor-property-section"><h4>Pattern Settings</h4><label>Pattern Type<select value={pattern} onChange={(event) => setPattern(event.target.value)}>{FLOORING_PATTERNS.map(([name]) => <option key={name}>{name}</option>)}</select></label><label>Pattern Scale<strong>1.0x</strong><input type="range" min="0.5" max="2" defaultValue="1" /></label><label>Rotation<strong>0°</strong><input type="range" min="0" max="360" defaultValue="0" /></label></div>
+    </>}
+    {tab === 'Heating' && <>
+      <div className="floor-hero-preview heating-hero"><strong>Underfloor Heating</strong><small>Comfort in every step. A warmer, smarter home.</small></div><div className="heating-toggle"><div><strong>Enable Heating</strong><small>Turn on to add underfloor heating to this floor</small></div><button className={`intelli-switch ${heating ? 'is-on' : ''}`} onClick={() => setHeating(!heating)}><span /></button></div><div className="heating-types"><button className={heatingType === 'Electric' ? 'is-selected' : ''} onClick={() => setHeatingType('Electric')}><strong>ϟ Electric</strong><small>Quick heating, ideal for apartments</small></button><button className={heatingType === 'Water-based' ? 'is-selected' : ''} onClick={() => setHeatingType('Water-based')}><strong>◌ Water-based</strong><small>Energy efficient, ideal for large spaces</small></button></div><label className="heating-range">Target Temperature<strong>{temperature} °C</strong><input type="range" min="16" max="30" value={temperature} onChange={(event) => setTemperature(event.target.value)} /></label><div className="coverage-buttons"><span>Coverage Area</span>{['This Room', 'All Rooms', 'Custom'].map((item) => <button key={item} className={item === 'This Room' ? 'is-selected' : ''}>{item}</button>)}</div><div className="heating-options"><span>Warm-up Time<strong>30 min</strong></span><span>Energy Consumption (Est.)<strong>120 W/m²</strong></span><span>Show Heating Pipes (Preview)<i className="intelli-switch is-on"><b /></i></span><span>Include in Cost<i className="intelli-switch is-on"><b /></i></span></div></>}
+    <div className="floor-actions"><button className="intelli-apply" onClick={() => apply({ floorHeating: heating, heatingType, heatingTemperature: Number(temperature) })}>{applied ? 'Applied' : tab === 'Heating' ? 'Apply Heating' : tab === 'Patterns' ? 'Apply Pattern' : 'Apply to Floor'}</button><button onClick={() => apply({})}>{tab === 'Properties' ? 'Reset' : tab === 'Patterns' ? 'Apply to All Floors' : '◈'}</button></div>
+  </div>;
+}
+
 function ConfigurationPanel() {
   const selectedIds = useStore((s) => s.selectedIds);
   const room = useStore((s) => s.room);
@@ -143,7 +196,7 @@ function ConfigurationPanel() {
           <button className="intelli-config-nav-bottom"><Settings2 size={18} strokeWidth={1.6} /><span>Settings</span></button>
         </nav>
         <div className="intelli-config-content">
-          {activeSection === 'Layout' ? <LayoutContent room={room} setRoomAppearance={setRoomAppearance} /> : activeSection === 'Walls' ? <WallsContent room={room} setRoomAppearance={setRoomAppearance} /> : <>
+          {activeSection === 'Layout' ? <LayoutContent room={room} setRoomAppearance={setRoomAppearance} /> : activeSection === 'Walls' ? <WallsContent room={room} setRoomAppearance={setRoomAppearance} /> : activeSection === 'Flooring' ? <FlooringContent room={room} setRoomAppearance={setRoomAppearance} /> : <>
           <div className="intelli-section-title">
             <div><h3>{activeSection}</h3><p>{activeSection === 'Flooring' ? 'Select material and finish' : 'Configure this layer'}</p></div>
           </div>
