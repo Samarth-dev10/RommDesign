@@ -1,1 +1,14 @@
 @import "tailwindcss";
+
+.room-dialog-backdrop { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 1rem; background: rgb(0 0 0 / 0.58); }
+.room-dialog { position: relative; width: min(100%, 25rem); display: grid; gap: 0.75rem; padding: 1.25rem; border: 1px solid rgb(255 255 255 / 0.14); border-radius: 0.9rem; background: #171a1b; color: #f5f3ee; box-shadow: 0 1.5rem 4rem rgb(0 0 0 / 0.4); }
+.room-dialog h3, .room-dialog p { margin: 0; }
+.room-dialog p { color: #a8aaa7; font-size: 0.85rem; }
+.room-dialog label { color: #d8d8d3; font-size: 0.78rem; font-weight: 600; }
+.room-dialog input { width: 100%; box-sizing: border-box; border: 1px solid #4a4e4b; border-radius: 0.45rem; background: #101212; color: inherit; padding: 0.65rem 0.7rem; outline: none; }
+.room-dialog input:focus { border-color: #b7c6ad; box-shadow: 0 0 0 2px rgb(183 198 173 / 0.2); }
+.room-dialog-close { position: absolute; top: 0.75rem; right: 0.75rem; display: grid; place-items: center; border: 0; background: transparent; color: #aaa; cursor: pointer; }
+.room-dialog-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 0.25rem; }
+.room-dialog-actions button { border: 1px solid #454946; border-radius: 0.45rem; background: #242826; color: #f5f3ee; padding: 0.55rem 0.8rem; cursor: pointer; }
+.room-dialog-actions button:last-child { border-color: #b7c6ad; background: #b7c6ad; color: #172019; }
+.room-dialog-actions button:disabled { cursor: not-allowed; opacity: 0.45; }

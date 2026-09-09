@@ -4,7 +4,7 @@
  * Contains search bar, category tabs, scrollable furniture grid,
  * favorites and recently used sections. Supports drag-to-add and click-to-add.
  */
-import React, { useState } from 'react';
+import { useMemo, useState } from 'react';
 import useStore from '../../store/useStore';
 import REGISTRY, {
   getFurnitureByCategory,
