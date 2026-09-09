@@ -10,6 +10,8 @@ export default function useAutosave() {
   const windows = useStore((state) => state.windows);
   const doors = useStore((state) => state.doors);
   const furniture = useStore((state) => state.furniture);
+  const structures = useStore((state) => state.structures);
+  const customTemplates = useStore((state) => state.customTemplates);
   const currentTemplate = useStore((state) => state.currentTemplate);
   const lightPreset = useStore((state) => state.lightPreset);
   const favorites = useStore((state) => state.favorites);
@@ -34,13 +36,15 @@ export default function useAutosave() {
         windows,
         doors,
         furniture,
+        structures,
+        customTemplates,
         lightPreset,
         favorites,
       });
       setSaveStatus(ok ? 'saved' : 'error');
     }, 700);
     return () => window.clearTimeout(timer);
-  }, [room, windows, doors, furniture, currentTemplate, lightPreset, favorites, setSaveStatus]);
+  }, [room, windows, doors, furniture, structures, customTemplates, currentTemplate, lightPreset, favorites, setSaveStatus]);
 
   useEffect(() => {
     if (saveStatus !== 'saved') return undefined;

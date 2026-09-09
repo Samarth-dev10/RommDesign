@@ -70,6 +70,7 @@ function createInitialState() {
   return {
     // ── Room & Template ──────────────────────────
     currentTemplate: DEFAULT_TEMPLATE,
+    customTemplates: [],
       room: { ...template.room, floorMaterial: template.room.floorMaterial || 'oakNatural', wallMaterial: template.room.wallMaterial || 'warmPaint' },
       windows: template.windows,
     doors: template.doors,
@@ -134,7 +135,12 @@ const useStore = create((set, get) => ({
   // ═══════════════════════════════════════════════
 
   setTemplate: (templateId) => {
-    const template = instantiateTemplate(templateId);
+    const customTemplate = get().customTemplates.find((item) => item.id === templateId);
+    const template = customTemplate ? {
+      ...customTemplate,
+      furniture: normalizeFurniture(customTemplate.furniture),
+      structures: normalizeStructures(customTemplate.structures),
+    } : instantiateTemplate(templateId);
     if (!template) return;
     set({
       currentTemplate: templateId,
@@ -142,6 +148,7 @@ const useStore = create((set, get) => ({
       windows: template.windows,
       doors: template.doors,
       furniture: normalizeFurniture(template.furniture),
+      structures: normalizeStructures(template.structures),
       lightPreset: template.lightPreset || 'day',
       lastSavedState: cloneFurnitureState(normalizeFurniture(template.furniture)),
       selectedIds: [],
@@ -151,6 +158,17 @@ const useStore = create((set, get) => ({
   },
 
   updateRoom: (updates) => set((state) => ({ room: { ...state.room, ...updates } })),
+
+  createCustomRoom: (name) => {
+    const trimmedName = String(name || '').trim();
+    if (!trimmedName) return null;
+    const id = `custom-room-${generateId()}`;
+    const baseRoom = { ...get().room, width: 6, depth: 5, height: 2.7, wallThickness: 0.2 };
+    const customTemplate = { id, name: trimmedName, room: baseRoom, windows: [], doors: [], furniture: [], structures: [], lightPreset: 'day' };
+    set((state) => ({ customTemplates: [...state.customTemplates, customTemplate] }));
+    get().setTemplate(id);
+    return id;
+  },
 
   addStructure: (type) => {
     if (!STRUCTURE_TYPES.has(type)) return;
@@ -437,7 +455,7 @@ const useStore = create((set, get) => ({
     })),
 
   exportRoom: () => {
-    const { currentTemplate, room, windows, doors, furniture, lightPreset } =
+    const { currentTemplate, room, windows, doors, furniture, structures, customTemplates, lightPreset } =
       get();
     return {
       version: 1,
@@ -446,6 +464,8 @@ const useStore = create((set, get) => ({
       windows,
       doors,
   furniture: furniture.map(furnitureInstanceToDto),
+  structures,
+  customTemplates,
   lightPreset,
   exportedAt: new Date().toISOString(),
     };
@@ -455,12 +475,16 @@ const useStore = create((set, get) => ({
     if (!data || !Array.isArray(data.furniture)) return;
     const room = data.room || createInitialState().room;
     const furniture = normalizeFurniture(data.furniture);
+    const structures = normalizeStructures(data.structures);
+    const customTemplates = Array.isArray(data.customTemplates) ? data.customTemplates : [];
     set({
       currentTemplate: data.currentTemplate || 'custom',
       room,
       windows: data.windows || [],
       doors: data.doors || [],
       furniture,
+      structures,
+      customTemplates,
       lastSavedState: cloneFurnitureState(furniture),
       lightPreset: data.lightPreset || 'day',
       favorites: Array.isArray(data.favorites) ? data.favorites : [],
