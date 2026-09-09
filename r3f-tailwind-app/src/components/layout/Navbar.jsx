@@ -50,14 +50,14 @@ export default function Navbar() {
           <Cuboid className="size-5 text-[#121313]" strokeWidth={1.8} aria-hidden="true" />
         </motion.div>
         <div className="flex flex-col justify-center">
-          <h1 className="text-base font-semibold text-[#eee9df] tracking-[0.02em] leading-none mb-1">RoomCraft</h1>
-          <span className="text-[9px] text-[#9a9a90] font-medium tracking-[0.18em] uppercase leading-none">3D Room Designer</span>
+          <h1 className="text-base font-semibold text-[#eee9df] tracking-[0.02em] leading-none mb-1">IntelliSpace</h1>
+          <span className="text-[9px] text-[#9a9a90] font-medium tracking-[0.18em] uppercase leading-none">Design · Visualize · Live Better</span>
         </div>
       </div>
 
       {/* Template Selector */}
       <div className="flex items-center gap-2">
-        <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest hidden md:block">Template</label>
+        <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest hidden md:block">Project</label>
         <select
           className="bg-[#232421] border border-[#343631] text-[#eee9df] px-3 py-1.5 rounded-md text-xs font-medium outline-none focus:border-[#c7a66a] focus:ring-2 focus:ring-[#c7a66a]/10 hover:border-[#c7a66a]/60 transition-colors min-w-32 cursor-pointer shadow-sm"
           value={currentTemplate}
@@ -108,6 +108,12 @@ export default function Navbar() {
             </option>
           ))}
         </select>
+      </div>
+
+      <div className="intelli-metrics">
+        <div><span>Total Area</span><strong>86.4 m²</strong></div>
+        <div><span>Base Price</span><strong>₹20,63,000</strong></div>
+        <div className="intelli-total"><span>Total Price</span><strong>₹23,42,800</strong></div>
       </div>
 
       {/* Toggles */}
