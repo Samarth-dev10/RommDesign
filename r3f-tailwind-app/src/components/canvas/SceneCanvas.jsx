@@ -9,6 +9,7 @@ import * as THREE from 'three';
 import { Canvas } from '@react-three/fiber';
 import Room from './Room';
 import FurnitureManager from './FurnitureManager';
+import InteriorStructures from './InteriorStructures';
 import CollisionAdvisoryEngine from './CollisionAdvisoryEngine';
 import SceneControls from './SceneControls';
 import SceneLighting from './SceneLighting';
@@ -91,6 +92,7 @@ export default function SceneCanvas() {
         <SceneLighting />
         <Room />
         <FurnitureManager />
+        <InteriorStructures />
         <CollisionAdvisoryEngine />
         <Grid />
         <MeasurementOverlay />

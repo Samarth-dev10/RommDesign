@@ -43,6 +43,28 @@ function normalizeFurniture(items = []) {
   return items.filter(Boolean).map(normalizeFurnitureItem);
 }
 
+const STRUCTURE_TYPES = new Set(['partition', 'column', 'opening', 'niche']);
+const STRUCTURE_DEFAULTS = {
+  partition: { label: 'Partition Wall', dimensions: [3, 2.7, 0.16], position: [0, 1.35, 0] },
+  column: { label: 'Column', dimensions: [0.35, 2.7, 0.35], position: [0, 1.35, 0] },
+  opening: { label: 'Room Opening', dimensions: [1.6, 2.1, 0.18], position: [0, 1.05, 0] },
+  niche: { label: 'Niche', dimensions: [1.2, 1.4, 0.28], position: [0, 1.2, -1] },
+};
+
+function normalizeStructure(item) {
+  const type = STRUCTURE_TYPES.has(item?.type) ? item.type : 'partition';
+  const defaults = STRUCTURE_DEFAULTS[type];
+  return {
+    id: item?.id || generateId(), type, label: item?.label || defaults.label,
+    position: normalizeVector(item?.position, defaults.position),
+    rotation: normalizeVector(item?.rotation, [0, 0, 0]),
+    dimensions: normalizeVector(item?.dimensions, defaults.dimensions),
+    isLocked: Boolean(item?.isLocked), isVisible: item?.isVisible !== false,
+  };
+}
+
+function normalizeStructures(items = []) { return items.filter(Boolean).map(normalizeStructure); }
+
 function createInitialState() {
   const template = instantiateTemplate(DEFAULT_TEMPLATE);
   return {
@@ -52,6 +74,7 @@ function createInitialState() {
       windows: template.windows,
     doors: template.doors,
     furniture: normalizeFurniture(template.furniture),
+    structures: [],
     lastSavedState: cloneFurnitureState(normalizeFurniture(template.furniture)),
 
     // ── Selection ────────────────────────────────
@@ -99,8 +122,8 @@ const useStore = create((set, get) => ({
 
   /** Push current furniture state to history before a mutation. */
   _pushHistory: () => {
-    const { furniture, history } = get();
-    const snapshot = JSON.parse(JSON.stringify(furniture));
+    const { furniture, structures, room, history } = get();
+    const snapshot = JSON.parse(JSON.stringify({ furniture, structures, room }));
     const newHistory = [...history, snapshot];
     if (newHistory.length > MAX_HISTORY_SIZE) newHistory.shift();
     set({ history: newHistory, future: [] });
@@ -126,6 +149,29 @@ const useStore = create((set, get) => ({
       future: [],
     });
   },
+
+  updateRoom: (updates) => set((state) => ({ room: { ...state.room, ...updates } })),
+
+  addStructure: (type) => {
+    if (!STRUCTURE_TYPES.has(type)) return;
+    get()._pushHistory();
+    const structure = normalizeStructure({ type });
+    set((state) => ({ structures: [...state.structures, structure], selectedIds: [structure.id] }));
+    return structure.id;
+  },
+  updateStructure: (id, updates) => set((state) => ({
+    structures: state.structures.map((item) => item.id === id
+      ? normalizeStructure({ ...item, ...(item.isLocked ? Object.fromEntries(Object.entries(updates).filter(([key]) => key === 'isLocked')) : updates) })
+      : item),
+  })),
+  updateStructureWithHistory: (id, updates) => {
+    const item = get().structures.find((entry) => entry.id === id);
+    if (!item || item.isLocked) return;
+    get()._pushHistory(); get().updateStructure(id, updates);
+  },
+  removeStructure: (id) => { if (!get().structures.some((item) => item.id === id)) return; get()._pushHistory(); set((state) => ({ structures: state.structures.filter((item) => item.id !== id), selectedIds: state.selectedIds.filter((selectedId) => selectedId !== id) })); },
+  toggleStructureLock: (id) => set((state) => ({ structures: state.structures.map((item) => item.id === id ? { ...item, isLocked: !item.isLocked } : item) })),
+  selectStructure: (id, additive = false) => set((state) => ({ selectedIds: additive ? (state.selectedIds.includes(id) ? state.selectedIds.filter((item) => item !== id) : [...state.selectedIds, id]) : [id] })),
 
   // ═══════════════════════════════════════════════
   // Furniture Actions
@@ -314,30 +360,29 @@ const useStore = create((set, get) => ({
   // ═══════════════════════════════════════════════
 
   undo: () => {
-    const { history, furniture, future } = get();
+    const { history, furniture, structures, room, future } = get();
     if (history.length === 0) return;
     const previous = history[history.length - 1];
     set({
       history: history.slice(0, -1),
-      future: [JSON.parse(JSON.stringify(furniture)), ...future].slice(
-        0,
-        MAX_HISTORY_SIZE
-      ),
-      furniture: previous,
+      future: [JSON.parse(JSON.stringify({ furniture, structures, room })), ...future].slice(0, MAX_HISTORY_SIZE),
+      furniture: previous.furniture || previous,
+      structures: previous.structures || [],
+      room: previous.room || room,
       selectedIds: [],
     });
   },
 
   redo: () => {
-    const { history, furniture, future } = get();
+    const { history, furniture, structures, room, future } = get();
     if (future.length === 0) return;
     const next = future[0];
     set({
       future: future.slice(1),
-      history: [...history, JSON.parse(JSON.stringify(furniture))].slice(
-        -MAX_HISTORY_SIZE
-      ),
-      furniture: next,
+      history: [...history, JSON.parse(JSON.stringify({ furniture, structures, room }))].slice(-MAX_HISTORY_SIZE),
+      furniture: next.furniture || next,
+      structures: next.structures || [],
+      room: next.room || room,
       selectedIds: [],
     });
   },
