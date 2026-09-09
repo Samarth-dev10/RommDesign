@@ -10,14 +10,14 @@ import REGISTRY, {
   getFurnitureByCategory,
   searchFurniture,
 } from '../../data/furnitureRegistry';
-import { CATEGORIES, FLOORING_MATERIAL_OPTIONS, FLOORING_MATERIALS, LIGHT_PRESET_OPTIONS, LIGHT_PRESETS, WALL_MATERIAL_OPTIONS, WALL_MATERIALS } from '../../constants';
+import { CATEGORIES, FLOORING_MATERIAL_OPTIONS, FLOORING_MATERIALS, WALL_MATERIAL_OPTIONS, WALL_MATERIALS } from '../../constants';
 import SearchBar from '../ui/SearchBar';
 import { useDragSource } from '../../hooks/useDragDrop';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useGLTF, Environment, Center } from '@react-three/drei';
 import { Suspense, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Palette, Sun } from 'lucide-react';
+import { ChevronDown, Palette } from 'lucide-react';
 import { isCatalogAssetReady } from '../../utils/catalogUtils';
 
 function SpinningModel({ modelPath }) {
@@ -338,14 +338,6 @@ export default function Sidebar() {
                 className="h-6 w-12 cursor-pointer rounded-md border border-slate-200 bg-white p-0.5"
                 aria-label="Custom wall tone"
               />
-            </label>
-            <label className="col-span-3 flex items-center justify-between gap-2 text-[10px] font-semibold text-slate-500">
-              <span className="flex items-center gap-1.5"><Sun className="size-3.5" aria-hidden="true" /> Lighting</span>
-              <select value={lightPreset} onChange={(event) => setLightPreset(event.target.value)} className="rounded-md border border-slate-200 bg-white px-2 py-1 text-[10px] font-bold text-slate-700">
-                {LIGHT_PRESET_OPTIONS.map((presetId) => (
-                  <option key={presetId} value={presetId}>{LIGHT_PRESETS[presetId].label}</option>
-                ))}
-              </select>
             </label>
           </div>
         )}
