@@ -165,7 +165,7 @@ export default function SceneControls() {
       <OrbitControls
         ref={orbitRef}
         makeDefault
-        maxPolarAngle={Math.PI / 2 - 0.05}
+        maxPolarAngle={Math.PI - 0.05}
         minDistance={1}
         maxDistance={40}
         enableDamping

@@ -4,7 +4,8 @@
  * Generates room geometry from template data. The room is centered at origin.
  * Walls have cutouts indicated by slightly different colored panels.
  */
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
+import { useFrame, useThree } from '@react-three/fiber';
 import { FLOORING_MATERIAL_BY_ID } from '../../data/flooringCatalog';
 import * as THREE from 'three';
 import useStore from '../../store/useStore';
@@ -130,6 +131,14 @@ export default function Room() {
   const windows = useStore((s) => s.windows);
   const doors = useStore((s) => s.doors);
   const lightPreset = useStore((s) => s.lightPreset);
+  const { camera } = useThree();
+  const floorGroup = useRef();
+  const ceilingGroup = useRef();
+  useFrame(() => {
+    const lookingFromAbove = camera.position.y >= height / 2;
+    if (floorGroup.current) floorGroup.current.visible = lookingFromAbove;
+    if (ceilingGroup.current) ceilingGroup.current.visible = !lookingFromAbove;
+  });
 
   const { width, depth, height, wallColor, floorColor, ceilingColor, wallThickness, ceilingMaterial, ceilingDesign, ceilingDepth, ceilingBorder, ceilingLayers, ceilingLighting } = room;
   const ceilingPalette = { 'Matte White': '#d7d5ce', 'Warm White': '#e4d5c1', 'Off White': '#d8d5ce', 'Light Grey': '#b9bdba', 'Concrete Finish': '#777875', 'Wood Panel': '#b48557', 'Slatted Wood': '#986238', 'Gypsum Board': '#c9c7c2', 'Acoustic Panel': '#ded8ce', 'Plaster Finish': '#b9b6ae', 'Metallic Finish': '#5d5e61', 'Custom Texture': '#4f5659' };
@@ -254,6 +263,7 @@ export default function Room() {
   return (
     <group userData={{ roomBounds: { width, depth, height }, floorY: 0 }}>
       {/* Floor */}
+      <group ref={floorGroup}>
       <mesh
         rotation={[-Math.PI / 2, 0, 0]}
         position={[0, 0, 0]}
@@ -271,8 +281,14 @@ export default function Room() {
           side={THREE.DoubleSide}
         />
       </mesh>
+      {floorTexture && <mesh position={[0, 0.022, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+        <planeGeometry args={[Math.max(width - 0.08, 0.1), Math.max(depth - 0.08, 0.1)]} />
+        <meshBasicMaterial map={floorTexture} color="#ffffff" side={THREE.DoubleSide} toneMapped={false} />
+      </mesh>}
+      </group>
 
       {/* Ceiling */}
+      <group ref={ceilingGroup}>
       <mesh position={[0, height, 0]} rotation={[Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry args={[width, depth]} />
         <meshStandardMaterial color={resolvedCeilingColor} roughness={ceilingMaterial === 'Metallic Finish' ? 0.38 : 0.85} metalness={ceilingMaterial === 'Metallic Finish' ? 0.62 : 0.02} side={THREE.DoubleSide} />
@@ -301,6 +317,7 @@ export default function Room() {
         <planeGeometry args={[width - 0.16, depth - 0.16]} />
         <meshStandardMaterial color={ceilingColor} roughness={0.72} metalness={0.02} />
       </mesh>
+      </group>
 
       {/* Back Wall (Z-) */}
       <Wall
@@ -337,12 +354,6 @@ export default function Room() {
       {/* Windows and Doors */}
       {windowMeshes}
       {doorMeshes}
-
-      {/* Pattern overlay keeps the selected flooring pattern readable under all lighting presets. */}
-      {floorTexture && <mesh position={[0, 0.022, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-        <planeGeometry args={[Math.max(width - 0.08, 0.1), Math.max(depth - 0.08, 0.1)]} />
-        <meshBasicMaterial map={floorTexture} color="#ffffff" side={THREE.DoubleSide} toneMapped={false} />
-      </mesh>}
 
       {/* Baseboard trim */}
       <mesh position={[0, 0.04, -hd + 0.005]} receiveShadow>
