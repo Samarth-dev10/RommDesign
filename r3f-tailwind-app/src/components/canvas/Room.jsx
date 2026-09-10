@@ -141,6 +141,7 @@ export default function Room() {
   });
 
   const { width, depth, height, wallColor, floorColor, ceilingColor, wallThickness, ceilingMaterial, ceilingDesign, ceilingDepth, ceilingBorder, ceilingLayers, ceilingLighting } = room;
+  const effectiveCeilingHeight = Number(room.ceilingHeight || height);
   const ceilingPalette = { 'Matte White': '#d7d5ce', 'Warm White': '#e4d5c1', 'Off White': '#d8d5ce', 'Light Grey': '#b9bdba', 'Concrete Finish': '#777875', 'Wood Panel': '#b48557', 'Slatted Wood': '#986238', 'Gypsum Board': '#c9c7c2', 'Acoustic Panel': '#ded8ce', 'Plaster Finish': '#b9b6ae', 'Metallic Finish': '#5d5e61', 'Custom Texture': '#4f5659' };
   const resolvedCeilingColor = ceilingPalette[ceilingMaterial] || ceilingColor;
   const floorMaterial = FLOORING_MATERIALS[room.floorMaterial] || FLOORING_MATERIALS.oakNatural;
@@ -289,7 +290,7 @@ export default function Room() {
 
       {/* Ceiling */}
       <group ref={ceilingGroup}>
-      <mesh position={[0, height, 0]} rotation={[Math.PI / 2, 0, 0]} receiveShadow>
+      <mesh position={[0, effectiveCeilingHeight, 0]} rotation={[Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry args={[width, depth]} />
         <meshStandardMaterial color={resolvedCeilingColor} roughness={ceilingMaterial === 'Metallic Finish' ? 0.38 : 0.85} metalness={ceilingMaterial === 'Metallic Finish' ? 0.62 : 0.02} side={THREE.DoubleSide} />
       </mesh>
@@ -308,9 +309,13 @@ export default function Room() {
         ))}
       </group>
 
-      {ceilingDesign === 'Coffered' && Array.from({ length: Math.max(1, Number(ceilingLayers || 2)) }).map((_, index) => <mesh key={`coffer-${index}`} position={[0, height - 0.04 - index * 0.015, 0]} rotation={[Math.PI / 2, 0, 0]}><planeGeometry args={[Math.max(width - (Number(ceilingBorder || 0.2) * 2) - index * 0.25, 0.2), Math.max(depth - (Number(ceilingBorder || 0.2) * 2) - index * 0.25, 0.2)]} /><meshStandardMaterial color={resolvedCeilingColor} roughness={0.72} /></mesh>)}
-      {(ceilingDesign === 'Beam' || ceilingDesign === 'Slatted') && Array.from({ length: Math.max(2, Number(ceilingLayers || 3)) }).map((_, index) => <mesh key={`beam-${index}`} position={[-width / 2 + (index + 1) * width / (Math.max(2, Number(ceilingLayers || 3)) + 1), height - Number(ceilingDepth || 0.15) / 2, 0]}><boxGeometry args={[Number(ceilingDepth || 0.15), Number(ceilingDepth || 0.15), depth]} /><meshStandardMaterial color={ceilingMaterial === 'Slatted Wood' || ceilingDesign === 'Slatted' ? '#986238' : '#806348'} roughness={0.68} /></mesh>)}
-      {(ceilingDesign === 'Tray' || ceilingDesign === 'Recessed') && <mesh position={[0, height - Number(ceilingDepth || 0.15), 0]} rotation={[Math.PI / 2, 0, 0]}><planeGeometry args={[Math.max(width - Number(ceilingBorder || 0.2) * 2, 0.2), Math.max(depth - Number(ceilingBorder || 0.2) * 2, 0.2)]} /><meshStandardMaterial color={resolvedCeilingColor} roughness={0.78} /></mesh>}
+      {ceilingDesign === 'Coffered' && Array.from({ length: Math.max(1, Number(ceilingLayers || 2)) }).map((_, index) => <mesh key={`coffer-${index}`} position={[0, effectiveCeilingHeight - 0.04 - index * 0.015, 0]} rotation={[Math.PI / 2, 0, 0]}><planeGeometry args={[Math.max(width - (Number(ceilingBorder || 0.2) * 2) - index * 0.25, 0.2), Math.max(depth - (Number(ceilingBorder || 0.2) * 2) - index * 0.25, 0.2)]} /><meshStandardMaterial color={resolvedCeilingColor} roughness={0.72} /></mesh>)}
+      {(ceilingDesign === 'Beam' || ceilingDesign === 'Slatted') && Array.from({ length: Math.max(2, Number(ceilingLayers || 3)) }).map((_, index) => <mesh key={`beam-${index}`} position={[-width / 2 + (index + 1) * width / (Math.max(2, Number(ceilingLayers || 3)) + 1), effectiveCeilingHeight - Number(ceilingDepth || 0.15) / 2, 0]}><boxGeometry args={[Number(ceilingDepth || 0.15), Number(ceilingDepth || 0.15), depth]} /><meshStandardMaterial color={ceilingMaterial === 'Slatted Wood' || ceilingDesign === 'Slatted' ? '#986238' : '#806348'} roughness={0.68} /></mesh>)}
+      {(ceilingDesign === 'Tray' || ceilingDesign === 'Recessed') && <mesh position={[0, effectiveCeilingHeight - Number(ceilingDepth || 0.15), 0]} rotation={[Math.PI / 2, 0, 0]}><planeGeometry args={[Math.max(width - Number(ceilingBorder || 0.2) * 2, 0.2), Math.max(depth - Number(ceilingBorder || 0.2) * 2, 0.2)]} /><meshStandardMaterial color={resolvedCeilingColor} roughness={0.78} /></mesh>}
+
+      {['Suspended', 'Acoustic'].includes(ceilingDesign) && <mesh position={[0, effectiveCeilingHeight - Number(ceilingDepth || 0.15), 0]} rotation={[Math.PI / 2, 0, 0]}><planeGeometry args={[Math.max(width - Number(ceilingBorder || 0.2), 0.2), Math.max(depth - Number(ceilingBorder || 0.2), 0.2)]} /><meshStandardMaterial color={resolvedCeilingColor} roughness={0.95} /></mesh>}
+      {ceilingDesign === 'Vaulted' && <mesh position={[0, effectiveCeilingHeight - 0.08, 0]} rotation={[Math.PI / 2, 0, 0]} scale={[1, 0.86, 1]}><planeGeometry args={[width, depth]} /><meshStandardMaterial color={resolvedCeilingColor} roughness={0.8} /></mesh>}
+      {['Curved', 'Geometric'].includes(ceilingDesign) && Array.from({ length: Math.max(2, Number(ceilingLayers || 2)) }).map((_, index) => <mesh key={`curve-${index}`} position={[0, effectiveCeilingHeight - 0.03 - index * Number(ceilingDepth || 0.15) * 0.12, 0]} rotation={[Math.PI / 2, 0, index * 0.18]}><planeGeometry args={[Math.max(width - index * Number(ceilingBorder || 0.2), 0.2), Math.max(depth - index * Number(ceilingBorder || 0.2), 0.2)]} /><meshStandardMaterial color={resolvedCeilingColor} roughness={0.78} /></mesh>)}
 
       {/* Recessed ceiling cove gives the room a finished architectural edge. */}
       <mesh position={[0, height - 0.055, 0]} rotation={[Math.PI / 2, 0, 0]}>

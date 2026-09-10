@@ -168,10 +168,13 @@ function ConfigurationPanel() {
   const [activeSection, setActiveSection] = useState('Layout');
   const [activeTab, setActiveTab] = useState('Materials');
   const [heating, setHeating] = useState(true);
+  const [panelWidth, setPanelWidth] = useState(366);
+  const resizeState = React.useRef(null);
+  const beginResize = (event) => { event.preventDefault(); resizeState.current = { startX: event.clientX, startWidth: panelWidth }; let latestWidth = panelWidth; const move = (moveEvent) => { latestWidth = Math.min(640, Math.max(330, resizeState.current.startWidth + resizeState.current.startX - moveEvent.clientX)); setPanelWidth(latestWidth); }; const stop = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', stop); }; window.addEventListener('pointermove', move); window.addEventListener('pointerup', stop); };
 
   if (selectedIds.length > 0) return null;
   return (
-    <aside className={`intelli-config ${activeSection === 'Furniture' ? 'is-furniture-config' : ''}`} aria-label="Configuration">
+    <aside className={`intelli-config ${activeSection === 'Furniture' ? 'is-furniture-config' : ''}`} style={{ width: panelWidth }} aria-label="Configuration"><button className="config-resize-handle" type="button" aria-label="Resize configuration panel" onPointerDown={beginResize}><span /></button>
       <div className="intelli-config-head">
         <div>
           <h2>Configuration</h2>
