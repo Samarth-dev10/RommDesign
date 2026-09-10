@@ -135,7 +135,7 @@ export default function Room() {
   const floorGroup = useRef();
   const ceilingGroup = useRef();
   useFrame(() => {
-    const lookingFromAbove = camera.position.y >= height / 2;
+    const lookingFromAbove = camera.position.y >= effectiveCeilingHeight / 2;
     if (floorGroup.current) floorGroup.current.visible = lookingFromAbove;
     if (ceilingGroup.current) ceilingGroup.current.visible = !lookingFromAbove;
   });
@@ -294,7 +294,7 @@ export default function Room() {
         <planeGeometry args={[width, depth]} />
         <meshStandardMaterial color={resolvedCeilingColor} roughness={ceilingMaterial === 'Metallic Finish' ? 0.38 : 0.85} metalness={ceilingMaterial === 'Metallic Finish' ? 0.62 : 0.02} side={THREE.DoubleSide} />
       </mesh>
-      <group position={[0, height - 0.025, 0]} visible={ceilingLighting !== false}>
+      <group position={[0, effectiveCeilingHeight - 0.025, 0]} visible={ceilingLighting !== false}>
         {[-0.32, 0, 0.32].map((x) => (
           <mesh key={`ceiling-fixture-${x}`} position={[x * width, 0, -depth * 0.14]} rotation={[Math.PI / 2, 0, 0]}>
             <circleGeometry args={[0.055, 24]} />
@@ -318,9 +318,9 @@ export default function Room() {
       {['Curved', 'Geometric'].includes(ceilingDesign) && Array.from({ length: Math.max(2, Number(ceilingLayers || 2)) }).map((_, index) => <mesh key={`curve-${index}`} position={[0, effectiveCeilingHeight - 0.03 - index * Number(ceilingDepth || 0.15) * 0.12, 0]} rotation={[Math.PI / 2, 0, index * 0.18]}><planeGeometry args={[Math.max(width - index * Number(ceilingBorder || 0.2), 0.2), Math.max(depth - index * Number(ceilingBorder || 0.2), 0.2)]} /><meshStandardMaterial color={resolvedCeilingColor} roughness={0.78} /></mesh>)}
 
       {/* Recessed ceiling cove gives the room a finished architectural edge. */}
-      <mesh position={[0, height - 0.055, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[width - 0.16, depth - 0.16]} />
-        <meshStandardMaterial color={ceilingColor} roughness={0.72} metalness={0.02} />
+      <mesh position={[0, effectiveCeilingHeight - 0.055, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[Math.max(width - Number(ceilingBorder || 0.2) * 2, 0.2), Math.max(depth - Number(ceilingBorder || 0.2) * 2, 0.2)]} />
+        <meshStandardMaterial color={resolvedCeilingColor} roughness={0.72} metalness={ceilingMaterial === 'Metallic Finish' ? 0.62 : 0.02} />
       </mesh>
       </group>
 
