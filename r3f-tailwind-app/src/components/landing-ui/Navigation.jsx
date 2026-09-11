@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { navigateTo } from '../../App.jsx'
+import { navigateTo } from '../../utils/navigation.js'
 import AuthModal from './AuthModal.jsx'
 
 export default function Navigation() {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { navigateTo } from '../../App.jsx';
+import { navigateTo } from '../../utils/navigation.js';
 
 export default function HeroOverlay() {
   return (

@@ -266,8 +266,6 @@ function EditorApp() {
   </div>;
 }
 
-export function navigateTo(path) { window.location.hash = path; }
-
 function getRoute() { const hash = window.location.hash.replace('#', ''); if (hash.startsWith('/editor')) return 'editor'; if (hash.startsWith('/login')) return 'login'; if (hash.startsWith('/register')) return 'register'; return 'landing'; }
 
 export default function App() {
