@@ -16,6 +16,8 @@ import { TEMPLATE_LIST } from './data/roomTemplates';
 import { FLOORING_CATEGORIES, FLOORING_MATERIAL_CATALOG, FLOORING_PATTERNS, flooringPatternBackground, getFloorMaterialColor, getFloorMaterialId } from './data/flooringCatalog';
 import REGISTRY from './data/furnitureRegistry';
 import { Heart, Plus, Search, SlidersHorizontal } from 'lucide-react';
+import LandingPage from './pages/LandingPage.jsx';
+import AuthPlaceholder from './pages/AuthPlaceholder.jsx';
 import { Box, ChevronDown, ChevronLeft, ChevronRight, Download, Expand, Grid2X2, Home, Layers3, Lightbulb, MousePointer2, Move, RotateCw, Ruler, Save, Settings2, Sun, Undo2, Redo2, X } from 'lucide-react';
 
 const tools = [
@@ -246,7 +248,7 @@ function WorkspaceOverlay() {
   </>;
 }
 
-export default function App() {
+function EditorApp() {
   useKeyboardShortcuts();
   useAutosave();
   const dropTargetProps = useDropTarget();
@@ -262,4 +264,15 @@ export default function App() {
     </main>
     <Toolbar />
   </div>;
+}
+
+function getRoute() { const path = window.location.pathname.replace(/^\/+/, ''); const hash = window.location.hash.replace(/^#\/?/, ''); const route = path || hash; if (route.startsWith('editor')) return 'editor'; if (route.startsWith('login')) return 'login'; if (route.startsWith('register')) return 'register'; return 'landing'; }
+
+export default function App() {
+  const [route, setRoute] = useState(getRoute);
+  useEffect(() => { const onHashChange = () => setRoute(getRoute()); window.addEventListener('popstate', onHashChange); window.addEventListener('hashchange', onHashChange); return () => { window.removeEventListener('popstate', onHashChange); window.removeEventListener('hashchange', onHashChange); }; }, []);
+  if (route === 'editor') return <EditorApp />;
+  if (route === 'login') return <AuthPlaceholder mode="login" />;
+  if (route === 'register') return <AuthPlaceholder mode="register" />;
+  return <LandingPage />;
 }
