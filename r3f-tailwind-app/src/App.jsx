@@ -266,11 +266,11 @@ function EditorApp() {
   </div>;
 }
 
-function getRoute() { const hash = window.location.hash.replace(/^#\/?/, ''); if (hash.startsWith('editor')) return 'editor'; if (hash.startsWith('login')) return 'login'; if (hash.startsWith('register')) return 'register'; return 'landing'; }
+function getRoute() { const path = window.location.pathname.replace(/^\/+/, ''); const hash = window.location.hash.replace(/^#\/?/, ''); const route = path || hash; if (route.startsWith('editor')) return 'editor'; if (route.startsWith('login')) return 'login'; if (route.startsWith('register')) return 'register'; return 'landing'; }
 
 export default function App() {
   const [route, setRoute] = useState(getRoute);
-  useEffect(() => { const onHashChange = () => setRoute(getRoute()); window.addEventListener('hashchange', onHashChange); return () => window.removeEventListener('hashchange', onHashChange); }, []);
+  useEffect(() => { const onHashChange = () => setRoute(getRoute()); window.addEventListener('popstate', onHashChange); window.addEventListener('hashchange', onHashChange); return () => { window.removeEventListener('popstate', onHashChange); window.removeEventListener('hashchange', onHashChange); }; }, []);
   if (route === 'editor') return <EditorApp />;
   if (route === 'login') return <AuthPlaceholder mode="login" />;
   if (route === 'register') return <AuthPlaceholder mode="register" />;

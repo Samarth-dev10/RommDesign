@@ -1,4 +1,5 @@
 export function navigateTo(path) {
-  const hash = path.replace(/^\/+/, '')
-  window.location.hash = hash
+  const pathname = path.startsWith('/') ? path : `/${path}`
+  window.history.pushState({}, '', pathname)
+  window.dispatchEvent(new PopStateEvent('popstate'))
 }
