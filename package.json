@@ -6,5 +6,8 @@
     "build": "npm --prefix r3f-tailwind-app run build",
     "dev": "npm --prefix r3f-tailwind-app run dev",
     "start": "npm --prefix r3f-tailwind-app run start"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.116.0"
   }
 }
