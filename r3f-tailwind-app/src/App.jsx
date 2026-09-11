@@ -266,7 +266,7 @@ function EditorApp() {
   </div>;
 }
 
-function getRoute() { const hash = window.location.hash.replace('#', ''); if (hash.startsWith('/editor')) return 'editor'; if (hash.startsWith('/login')) return 'login'; if (hash.startsWith('/register')) return 'register'; return 'landing'; }
+function getRoute() { const hash = window.location.hash.replace(/^#\/?/, ''); if (hash.startsWith('editor')) return 'editor'; if (hash.startsWith('login')) return 'login'; if (hash.startsWith('register')) return 'register'; return 'landing'; }
 
 export default function App() {
   const [route, setRoute] = useState(getRoute);

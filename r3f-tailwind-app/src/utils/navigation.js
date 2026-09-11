@@ -1,3 +1,4 @@
 export function navigateTo(path) {
-  window.location.hash = path
+  const hash = path.replace(/^\/+/, '')
+  window.location.hash = hash
 }
