@@ -7,20 +7,19 @@
 import React from 'react';
 import useStore from '../../store/useStore';
 import { TEMPLATE_LIST } from '../../data/roomTemplates';
-import { CAMERA_MODES, LIGHT_PRESETS } from '../../constants';
+import REGISTRY from '../../data/furnitureRegistry';
 import SaveIndicator from '../ui/SaveIndicator';
 import { motion } from 'framer-motion';
-import { Magnet, Grid, Map as MapIcon, Ruler, Undo, Redo, Cuboid } from 'lucide-react';
+import { Magnet, Grid, Map as MapIcon, Ruler, Undo, Redo, ArrowDown, Sparkles } from 'lucide-react';
+import { useMemo } from 'react';
 
 export default function Navbar() {
   const currentTemplate = useStore((s) => s.currentTemplate);
-  const cameraMode = useStore((s) => s.cameraMode);
-  const lightPreset = useStore((s) => s.lightPreset);
+  const room = useStore((s) => s.room);
+  const furniture = useStore((s) => s.furniture);
   const history = useStore((s) => s.history);
   const future = useStore((s) => s.future);
   const setTemplate = useStore((s) => s.setTemplate);
-  const setCameraMode = useStore((s) => s.setCameraMode);
-  const setLightPreset = useStore((s) => s.setLightPreset);
   const undo = useStore((s) => s.undo);
   const redo = useStore((s) => s.redo);
   const snapEnabled = useStore((s) => s.snapEnabled);
@@ -31,6 +30,14 @@ export default function Navbar() {
   const toggleMinimap = useStore((s) => s.toggleMinimap);
   const showMeasurements = useStore((s) => s.showMeasurements);
   const toggleMeasurements = useStore((s) => s.toggleMeasurements);
+  const metrics = useMemo(() => {
+    const area = Math.max(0, Number(room.width || 0) * Number(room.depth || 0));
+    const flooring = Number(room.floorMaterial ? 1800 : 0);
+    const furnishing = furniture.reduce((sum, item) => sum + (REGISTRY.find((entry) => entry.id === item.catalogItemId)?.price || 5000), 0);
+    const base = Math.round(area * 18000 + flooring + furnishing);
+    return { area, base, total: Math.round(base * 1.135) };
+  }, [room.width, room.depth, room.floorMaterial, furniture]);
+  const formatCurrency = (value) => `₹${value.toLocaleString('en-IN')}`;
 
   return (
     <motion.nav 
@@ -41,79 +48,33 @@ export default function Navbar() {
       id="main-navbar"
     >
       {/* Logo & Title */}
-      <div className="flex items-center gap-3 mr-2">
-        <motion.div 
-          whileHover={{ rotate: 180 }}
-          transition={{ type: "spring", stiffness: 200, damping: 10 }}
-          className="w-9 h-9 flex items-center justify-center bg-[#c7a66a] rounded-sm shadow-[0_6px_16px_rgba(199,166,106,0.18)]"
-        >
-          <Cuboid className="size-5 text-[#121313]" strokeWidth={1.8} aria-hidden="true" />
-        </motion.div>
-        <div className="flex flex-col justify-center">
-          <h1 className="text-base font-semibold text-[#eee9df] tracking-[0.02em] leading-none mb-1">IntelliSpace</h1>
-          <span className="text-[9px] text-[#9a9a90] font-medium tracking-[0.18em] uppercase leading-none">Design · Visualize · Live Better</span>
-        </div>
+      <div className="intelli-brand" aria-label="IntelliSpace editor">
+        <motion.div whileHover={{ scale: 1.04 }} className="intelli-brand-mark" aria-hidden="true"><span /><span /><i /></motion.div>
+        <div className="intelli-brand-copy"><h1>INTELLI<span>SPACE</span></h1><span>Spatial design studio</span></div>
       </div>
 
       {/* Template Selector */}
-      <div className="flex items-center gap-2">
-        <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest hidden md:block">Project</label>
-        <select
-          className="bg-[#232421] border border-[#343631] text-[#eee9df] px-3 py-1.5 rounded-md text-xs font-medium outline-none focus:border-[#c7a66a] focus:ring-2 focus:ring-[#c7a66a]/10 hover:border-[#c7a66a]/60 transition-colors min-w-32 cursor-pointer shadow-sm"
+      <div className="intelli-project-picker">
+        <span className="intelli-project-label">Project</span>
+        <div className="intelli-project-select-wrap"><select
+          className="intelli-project-select"
           value={currentTemplate}
           onChange={(e) => setTemplate(e.target.value)}
           id="template-selector"
+          aria-label="Select project template"
         >
           {TEMPLATE_LIST.map((t) => (
-            <option key={t.id} value={t.id} className="bg-white text-slate-900 font-medium">
-              {t.icon} {t.name}
-            </option>
+            <option key={t.id} value={t.id} className="bg-[#16191c] text-[#eee9df] font-medium">{t.name}</option>
           ))}
-        </select>
+        </select><ArrowDown className="intelli-project-chevron" size={13} aria-hidden="true" /></div>
       </div>
 
-      <div className="w-px h-5 bg-slate-200" />
+      <div className="intelli-header-divider" />
 
-      {/* Camera Mode */}
-      <div className="flex items-center gap-2">
-        <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest hidden md:block">Camera</label>
-        <select
-          className="bg-[#232421] border border-[#343631] text-[#eee9df] px-3 py-1.5 rounded-md text-xs font-medium outline-none focus:border-[#c7a66a] focus:ring-2 focus:ring-[#c7a66a]/10 hover:border-[#c7a66a]/60 transition-colors min-w-28 cursor-pointer shadow-sm"
-          value={cameraMode}
-          onChange={(e) => setCameraMode(e.target.value)}
-          id="camera-selector"
-        >
-          {Object.entries(CAMERA_MODES).map(([key, mode]) => (
-            <option key={key} value={key} className="bg-white text-slate-900 font-medium">
-              {mode.icon} {mode.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="w-px h-5 bg-slate-200" />
-
-      {/* Light Preset */}
-      <div className="flex items-center gap-2">
-        <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest hidden md:block">Lighting</label>
-        <select
-          className="bg-[#232421] border border-[#343631] text-[#eee9df] px-3 py-1.5 rounded-md text-xs font-medium outline-none focus:border-[#c7a66a] focus:ring-2 focus:ring-[#c7a66a]/10 hover:border-[#c7a66a]/60 transition-colors min-w-28 cursor-pointer shadow-sm"
-          value={lightPreset}
-          onChange={(e) => setLightPreset(e.target.value)}
-          id="light-selector"
-        >
-          {Object.entries(LIGHT_PRESETS).map(([key, preset]) => (
-            <option key={key} value={key} className="bg-white text-slate-900 font-medium">
-              {preset.icon} {preset.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="intelli-metrics">
-        <div><span>Total Area</span><strong>86.4 m²</strong></div>
-        <div><span>Base Price</span><strong>₹20,63,000</strong></div>
-        <div className="intelli-total"><span>Total Price</span><strong>₹23,42,800</strong></div>
+      <div className="intelli-metrics" aria-label="Live project totals">
+        <div><span>Total Area</span><strong>{metrics.area.toFixed(1)} m²</strong></div>
+        <div><span>Base Price</span><strong>{formatCurrency(metrics.base)}</strong></div>
+        <div className="intelli-total"><span>Total Price</span><strong>{formatCurrency(metrics.total)}</strong></div>
       </div>
 
       {/* Toggles */}
