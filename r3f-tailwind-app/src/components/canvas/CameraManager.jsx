@@ -20,19 +20,19 @@ export default function CameraManager() {
   const prevMode = useRef(cameraMode);
 
   useEffect(() => {
-    if (prevMode.current !== cameraMode) {
-      const preset = CAMERA_MODES[cameraMode];
-      if (preset) {
-        targetPosition.current.set(...preset.position);
-        isTransitioning.current = true;
-        if (camera.fov !== preset.fov) {
-          camera.fov = preset.fov;
-          camera.updateProjectionMatrix();
-        }
-      }
-      prevMode.current = cameraMode;
-    }
+    const preset = CAMERA_MODES[cameraMode] || CAMERA_MODES.perspective;
+    targetPosition.current.set(...preset.position);
+    isTransitioning.current = true;
+    camera.fov = preset.fov;
+    camera.updateProjectionMatrix();
+    prevMode.current = cameraMode;
   }, [cameraMode, camera]);
+
+  useEffect(() => {
+    const preset = CAMERA_MODES[cameraMode] || CAMERA_MODES.perspective;
+    camera.position.set(...preset.position);
+    camera.lookAt(...(preset.target || [0, 0.75, 0]));
+  }, [camera]);
 
   useFrame(() => {
     if (!isTransitioning.current) return;

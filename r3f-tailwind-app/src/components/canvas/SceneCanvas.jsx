@@ -18,26 +18,18 @@ import Grid from './Grid';
 import MeasurementOverlay from './MeasurementOverlay';
 import useStore from '../../store/useStore';
 
-function SceneFallback() {
-  return null;
-}
+function SceneFallback() { return null; }
+function RoomFallback() { return <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, 0]}><planeGeometry args={[12, 12]} /><meshStandardMaterial color="#24282c" /></mesh>; }
 
 class SceneErrorBoundary extends React.Component {
   state = { hasError: false };
+  static getDerivedStateFromError() { return { hasError: true }; }
+  componentDidCatch(error) { if (import.meta.env.DEV) console.warn('[v0] Scene layer failed; preserving editor viewport.', error); }
+  render() { return this.state.hasError ? this.props.fallback ?? <SceneFallback /> : this.props.children; }
+}
 
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-
-  componentDidCatch(error) {
-    if (import.meta.env.DEV) {
-      console.warn('[v0] Scene asset failed to load; showing fallback scene.', error);
-    }
-  }
-
-  render() {
-    return this.state.hasError ? <SceneFallback /> : this.props.children;
-  }
+function SceneLayer({ children, fallback = null }) {
+  return <SceneErrorBoundary fallback={fallback}>{children}</SceneErrorBoundary>;
 }
 
 /** Click on empty space to deselect */
@@ -89,14 +81,14 @@ export default function SceneCanvas() {
         <Suspense fallback={<SceneFallback />}>
         <color attach="background" args={['#121313']} />
         <fog attach="fog" args={['#121313', 18, 42]} />
-        <SceneLighting />
-        <Room />
-        <FurnitureManager />
-        <InteriorStructures />
-        <CollisionAdvisoryEngine />
-        <Grid />
-        <MeasurementOverlay />
-        <DeselectPlane />
+        <SceneLayer><SceneLighting /></SceneLayer>
+        <SceneLayer fallback={<RoomFallback />}><Room /></SceneLayer>
+        <SceneLayer><FurnitureManager /></SceneLayer>
+        <SceneLayer><InteriorStructures /></SceneLayer>
+        <SceneLayer><CollisionAdvisoryEngine /></SceneLayer>
+        <SceneLayer><Grid /></SceneLayer>
+        <SceneLayer><MeasurementOverlay /></SceneLayer>
+        <SceneLayer><DeselectPlane /></SceneLayer>
 
         {/* Directional lighting and room materials provide the grounding. */}
         </Suspense>
