@@ -18,7 +18,9 @@ export function downloadRoomJSON(roomData) {
   link.download = `room-${roomData.currentTemplate || 'custom'}-${Date.now()}.json`;
   document.body.appendChild(link);
   link.click();
-  document.body.removeChild(link);
+  // Browser download handlers/extensions can detach the anchor synchronously.
+  // Guard cleanup so export never races an external DOM mutation.
+  if (link.parentNode) link.parentNode.removeChild(link);
   URL.revokeObjectURL(url);
 }
 
