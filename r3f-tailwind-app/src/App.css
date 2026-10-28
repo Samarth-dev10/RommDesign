@@ -46,7 +46,18 @@
 .workspace-manager-footer { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: .85rem 1.25rem; border-top: 1px solid #333833; color: #a8ada5; font-size: .72rem; }
 .workspace-manager-footer span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .workspace-manager-spinning { animation: workspace-manager-spin 1s linear infinite; }
-@keyframes workspace-manager-spin { to { transform: rotate(360deg); } }
+ .workspace-manager-hero { display:grid; grid-template-columns:auto 1fr; gap:.9rem; margin:1rem 1.25rem .55rem; padding:1rem; border:1px solid #303030; border-radius:1rem; background:radial-gradient(circle at 15% 15%,#292929,transparent 48%),linear-gradient(145deg,#171717,#0b0b0b); box-shadow:inset 0 1px 0 rgb(255 255 255 / .08),0 1rem 2.5rem rgb(0 0 0 / .22); }
+ .workspace-manager-hero-icon { display:grid; place-items:center; width:2.35rem; height:2.35rem; border:1px solid #777; border-radius:.7rem; color:#fff; background:#202020; box-shadow:0 0 20px rgb(255 255 255 / .08); }
+ .workspace-manager-eyebrow { color:#888; font:500 .58rem/1 'DM Mono',monospace; letter-spacing:.16em; }
+ .workspace-manager-hero h3 { margin:.45rem 0 .25rem; font:500 1.08rem/1.1 'Playfair Display',Georgia,serif; letter-spacing:-.02em; }
+ .workspace-manager-hero p { margin:0; color:#969696; font-size:.72rem; line-height:1.45; }
+ .workspace-manager-local { width:calc(100% - 2.5rem); display:flex; align-items:center; gap:.75rem; margin:.55rem 1.25rem 1rem; padding:.8rem .7rem; border:1px solid #494949; border-radius:.72rem; color:#f4f4f1; background:linear-gradient(110deg,#252525,#111); text-align:left; cursor:pointer; transition:transform .2s,border-color .2s,background .2s; }
+ .workspace-manager-local:hover,.workspace-manager-local.is-active { transform:translateY(-1px); border-color:#a5a5a5; background:linear-gradient(110deg,#303030,#151515); }
+ .workspace-manager-local-icon { display:grid; place-items:center; flex:0 0 2.2rem; height:2.2rem; border:1px solid #777; border-radius:.6rem; color:#fff; background:#161616; }
+ .workspace-manager-local span:nth-child(2) { display:grid; gap:.18rem; flex:1; min-width:0; }.workspace-manager-local strong { font-size:.8rem; }.workspace-manager-local small { color:#969696; font-size:.67rem; }
+ .workspace-manager-list-heading { padding-top:1rem; }.workspace-manager-list-heading > div { display:grid; gap:.2rem; }.workspace-manager-list-heading small { color:#777; font-size:.64rem; font-weight:400; }
+ .workspace-manager-item { border-color:#242424; background:linear-gradient(110deg,#121212,#0d0d0d); margin-bottom:.35rem; }.workspace-manager-item:hover,.workspace-manager-item.is-active { border-color:#747474; background:linear-gradient(110deg,#242424,#121212); box-shadow:inset 0 1px 0 rgb(255 255 255 / .05); }
+ @keyframes workspace-manager-spin { to { transform: rotate(360deg); } }
 @media (max-width: 760px) { .workspace-manager-trigger span { display: none; } .workspace-manager-trigger { padding: .45rem; } }
 
 /* Workspace custom furniture upload */
