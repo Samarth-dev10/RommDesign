@@ -25,9 +25,14 @@ export default function ScrollExperience({ sectionCount, children }) {
       }
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    let frame = 0;
+    const scheduleScroll = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => { frame = 0; handleScroll(); });
+    };
+    window.addEventListener('scroll', scheduleScroll, { passive: true });
     handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => { window.removeEventListener('scroll', scheduleScroll); if (frame) cancelAnimationFrame(frame); };
   }, [sectionCount, setActiveSection]);
 
   useEffect(() => {
