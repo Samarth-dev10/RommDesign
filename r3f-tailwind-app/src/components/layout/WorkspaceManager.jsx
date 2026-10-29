@@ -7,6 +7,7 @@ import useStore from '../../store/useStore.js';
 export default function WorkspaceManager() {
   const [name, setName] = useState('');
   const [localError, setLocalError] = useState('');
+  const [portalHost, setPortalHost] = useState(null);
   const managerOpen = useWorkspaceStore((s) => s.managerOpen);
   const workspaces = useWorkspaceStore((s) => s.workspaces);
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId);
@@ -22,6 +23,17 @@ export default function WorkspaceManager() {
   const saveEditorSnapshot = useWorkspaceStore((s) => s.saveEditorSnapshot);
   const clearActiveWorkspace = useWorkspaceStore((s) => s.clearActiveWorkspace);
   const resetToLocalDraft = useStore((s) => s.resetToLocalDraft);
+
+  useEffect(() => {
+    const host = document.createElement('div');
+    host.dataset.intellispacePortal = 'workspace-manager';
+    document.body.appendChild(host);
+    setPortalHost(host);
+    return () => {
+      setPortalHost(null);
+      host.remove();
+    };
+  }, []);
 
   useEffect(() => {
     if (!managerOpen) return;
@@ -57,7 +69,7 @@ export default function WorkspaceManager() {
     closeManager();
   }
 
-  const managerWindow = managerOpen && typeof document !== 'undefined' ? createPortal(
+  const managerWindow = managerOpen && portalHost ? createPortal(
     <div className="workspace-manager-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget && !isWorking) closeManager(); }}>
       <section className="workspace-manager-dialog" role="dialog" aria-modal="true" aria-labelledby="workspace-manager-title">
         <header className="workspace-manager-header">
@@ -85,7 +97,7 @@ export default function WorkspaceManager() {
         <footer className="workspace-manager-footer"><span>Active: {activeWorkspaceName || 'Local draft'}</span><button type="button" onClick={closeManager} disabled={isWorking}>Done</button></footer>
       </section>
     </div>,
-    document.body,
+    portalHost,
   ) : null;
 
   return <>
