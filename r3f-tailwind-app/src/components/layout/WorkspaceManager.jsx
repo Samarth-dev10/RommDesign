@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Cloud, FolderOpen, Plus, RefreshCw, Sparkles, X } from 'lucide-react';
 import useWorkspaceStore from '../../store/useWorkspaceStore.js';
 import useStore from '../../store/useStore.js';
@@ -49,11 +50,8 @@ export default function WorkspaceManager() {
     closeManager();
   }
 
-  return <>
-    <button type="button" className="workspace-manager-trigger" onClick={openManager} title="Create or open a cloud workspace">
-      <Cloud size={14} /> <span>My Workspaces</span>
-    </button>
-    {managerOpen && <div className="workspace-manager-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget && !isWorking) closeManager(); }}>
+  const managerWindow = managerOpen && typeof document !== 'undefined' ? createPortal(
+    <div className="workspace-manager-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget && !isWorking) closeManager(); }}>
       <section className="workspace-manager-dialog" role="dialog" aria-modal="true" aria-labelledby="workspace-manager-title">
         <header className="workspace-manager-header">
           <div><h2 id="workspace-manager-title">My Workspaces</h2><p>Save a design to your account and open it on another device.</p></div>
@@ -79,6 +77,14 @@ export default function WorkspaceManager() {
         {(localError || cloudError) && <p className="workspace-manager-error" role="alert">{localError || cloudError}</p>}
         <footer className="workspace-manager-footer"><span>Active: {activeWorkspaceName || 'Local draft'}</span><button type="button" onClick={closeManager} disabled={isWorking}>Done</button></footer>
       </section>
-    </div>}
+    </div>,
+    document.body,
+  ) : null;
+
+  return <>
+    <button type="button" className="workspace-manager-trigger" onClick={openManager} title="Create or open a cloud workspace">
+      <Cloud size={14} /> <span>My Workspaces</span>
+    </button>
+    {managerWindow}
   </>;
 }

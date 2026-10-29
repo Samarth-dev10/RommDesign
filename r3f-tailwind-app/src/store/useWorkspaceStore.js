@@ -145,6 +145,7 @@ const useWorkspaceStore = create((set, get) => ({
         designStyle: 'custom',
         room: roomPayload(snapshot),
         appearance: appearancePayload(snapshot),
+        editorState: snapshot,
         currency: 'INR',
       });
       const saved = await updateWorkspace(created.id, updatePayload(snapshot, created.version ?? 0));
