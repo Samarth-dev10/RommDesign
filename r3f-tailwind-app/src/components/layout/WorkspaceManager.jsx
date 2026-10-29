@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Cloud, FolderOpen, Plus, RefreshCw, Sparkles, X } from 'lucide-react';
-import useWorkspaceStore from '../../store/useWorkspaceStore.js';
+import useWorkspaceStore, { getEditorSnapshot } from '../../store/useWorkspaceStore.js';
 import useStore from '../../store/useStore.js';
 
 export default function WorkspaceManager() {
@@ -19,6 +19,7 @@ export default function WorkspaceManager() {
   const refreshWorkspaces = useWorkspaceStore((s) => s.refreshWorkspaces);
   const createCurrentWorkspace = useWorkspaceStore((s) => s.createCurrentWorkspace);
   const openWorkspace = useWorkspaceStore((s) => s.openWorkspace);
+  const saveEditorSnapshot = useWorkspaceStore((s) => s.saveEditorSnapshot);
   const clearActiveWorkspace = useWorkspaceStore((s) => s.clearActiveWorkspace);
   const resetToLocalDraft = useStore((s) => s.resetToLocalDraft);
 
@@ -40,8 +41,14 @@ export default function WorkspaceManager() {
 
   async function handleOpen(id) {
     setLocalError('');
-    try { await openWorkspace(id); }
-    catch (error) { setLocalError(error.message || 'Could not open this workspace.'); }
+    try {
+      if (activeWorkspaceId && activeWorkspaceId !== id) {
+        await saveEditorSnapshot(getEditorSnapshot());
+      }
+      await openWorkspace(id);
+    } catch (error) {
+      setLocalError(error.message || 'Could not save or open this workspace.');
+    }
   }
 
   function handleLocalDraft() {

@@ -73,7 +73,7 @@ function updatePayload(snapshot, expectedVersion) {
 
 function hydrateFromDetail(detail) {
   if (!detail?.id) return false;
-  const editorState = detail.editorState;
+  const editorState = detail.editorState || detail.editor_state || detail.snapshot || detail.editorStateJson;
   const hasSnapshot = editorState && Array.isArray(editorState.furniture);
   if (hasSnapshot) {
     const snapshot = {
