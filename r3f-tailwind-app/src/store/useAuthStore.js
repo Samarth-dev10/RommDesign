@@ -5,6 +5,7 @@ const initialSession = getSession()
 
 const useAuthStore = create((set) => ({
   session: initialSession,
+  sessionDurationDays: 15,
   isAuthenticated: Boolean(initialSession?.token),
   isLoading: false,
   error: '',
@@ -39,5 +40,11 @@ const useAuthStore = create((set) => ({
     set({ session: null, isAuthenticated: false, error: '' })
   },
 }))
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('intellispace:session-ended', () => {
+    useAuthStore.setState({ session: null, isAuthenticated: false, error: '' })
+  })
+}
 
 export default useAuthStore

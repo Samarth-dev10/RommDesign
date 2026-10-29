@@ -11,7 +11,8 @@ import REGISTRY from '../../data/furnitureRegistry';
 import SaveIndicator from '../ui/SaveIndicator';
 import WorkspaceManager from './WorkspaceManager.jsx';
 import { motion } from 'framer-motion';
-import { Magnet, Grid, Map as MapIcon, Ruler, Undo, Redo, ArrowDown, Sparkles } from 'lucide-react';
+import { Magnet, Grid, Map as MapIcon, Ruler, Undo, Redo, ArrowDown, Sparkles, LogOut } from 'lucide-react';
+import useAuthStore from '../../store/useAuthStore.js';
 import { useMemo } from 'react';
 
 export default function Navbar() {
@@ -23,6 +24,7 @@ export default function Navbar() {
   const setTemplate = useStore((s) => s.setTemplate);
   const undo = useStore((s) => s.undo);
   const redo = useStore((s) => s.redo);
+  const logout = useAuthStore((s) => s.logout);
   const snapEnabled = useStore((s) => s.snapEnabled);
   const toggleSnap = useStore((s) => s.toggleSnap);
   const showGrid = useStore((s) => s.showGrid);
@@ -121,6 +123,7 @@ export default function Navbar() {
       {/* Save Indicator */}
       <WorkspaceManager />
       <SaveIndicator />
+      <button type="button" className="intelli-signout" onClick={logout} title="Sign out now" aria-label="Sign out now"><LogOut size={14} /><span>Sign out</span></button>
 
       {/* Actions */}
       <div className="flex items-center gap-1 ml-2 border-l border-[#343631] pl-3">
