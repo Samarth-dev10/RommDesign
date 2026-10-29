@@ -71,16 +71,34 @@ function updatePayload(snapshot, expectedVersion) {
   };
 }
 
-function hydrateFromDetail(detail) {
-  if (!detail?.id) return false;
-  const editorState = detail.editorState || detail.editor_state || detail.snapshot || detail.editorStateJson;
+function unwrapWorkspace(payload) {
+  return payload?.workspace || payload?.data?.workspace || payload?.data || payload;
+}
+
+function normalizeWorkspaceSummary(workspace) {
+  const item = unwrapWorkspace(workspace) || {};
+  return {
+    ...item,
+    id: item.id || item.workspaceId || item.workspace_id,
+    name: item.name || item.title || 'Untitled workspace',
+    roomType: item.roomType || item.room_type,
+    designStyle: item.designStyle || item.design_style,
+  };
+}
+
+function hydrateFromDetail(rawDetail) {
+  const detail = unwrapWorkspace(rawDetail);
+  if (!detail?.id && !detail?.workspaceId && !detail?.workspace_id) return false;
+  const normalizedDetail = normalizeWorkspaceSummary(detail);
+  const workspaceId = normalizedDetail.id;
+  const editorState = detail.editorState || detail.editor_state || detail.snapshot || detail.editorStateJson || detail.editor_state_json;
   const hasSnapshot = editorState && Array.isArray(editorState.furniture);
   if (hasSnapshot) {
     const snapshot = {
       ...editorState,
       room: {
         ...(editorState.room || {}),
-        ...(detail.room || {}),
+        ...(detail.room || detail.room_config || {}),
         ...(detail.appearance ? {
           wallColor: detail.appearance.wallColor,
           floorColor: detail.appearance.floorColor,
@@ -91,10 +109,10 @@ function hydrateFromDetail(detail) {
     };
     useStore.getState().importRoom(snapshot);
   }
-  writeActiveWorkspaceId(detail.id);
+  writeActiveWorkspaceId(workspaceId);
   useWorkspaceStore.setState({
-    activeWorkspaceId: detail.id,
-    activeWorkspaceName: detail.name || 'Untitled workspace',
+    activeWorkspaceId: workspaceId,
+    activeWorkspaceName: normalizedDetail.name,
     version: Number.isInteger(detail.version) ? detail.version : 0,
     cloudStatus: 'saved',
     cloudError: '',
@@ -121,8 +139,11 @@ const useWorkspaceStore = create((set, get) => ({
   async refreshWorkspaces() {
     set({ isListing: true, cloudError: '' });
     try {
-      const rows = await listWorkspaces();
-      const workspaces = Array.isArray(rows) ? rows : [];
+      const payload = await listWorkspaces();
+      const rows = Array.isArray(payload)
+        ? payload
+        : payload?.workspaces || payload?.items || payload?.data?.workspaces || payload?.data?.items || [];
+      const workspaces = Array.isArray(rows) ? rows.map(normalizeWorkspaceSummary).filter((workspace) => workspace.id) : [];
       set({ workspaces, isListing: false });
       return workspaces;
     } catch (error) {
@@ -148,6 +169,7 @@ const useWorkspaceStore = create((set, get) => ({
         editorState: snapshot,
         currency: 'INR',
       });
+      created = normalizeWorkspaceSummary(created);
       const saved = await updateWorkspace(created.id, updatePayload(snapshot, created.version ?? 0));
       hydrateFromDetail(saved);
       set({ isWorking: false, cloudStatus: 'saved', cloudError: '', managerOpen: false });
