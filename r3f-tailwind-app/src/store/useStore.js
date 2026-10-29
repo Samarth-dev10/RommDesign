@@ -88,11 +88,12 @@ function createInitialState() {
     currentTemplate: DEFAULT_TEMPLATE,
     customTemplates: [],
       room: { ...template.room, floorMaterial: template.room.floorMaterial || 'floor-1', wallMaterial: template.room.wallMaterial || 'warmPaint' },
-      windows: template.windows,
-    doors: template.doors,
-    furniture: normalizeFurniture(template.furniture),
+    // Start in a calm, empty local canvas. Rooms are composed from the workspace picker.
+    furniture: [],
     structures: [],
-    lastSavedState: cloneFurnitureState(normalizeFurniture(template.furniture)),
+    windows: [],
+    doors: [],
+    lastSavedState: [],
 
     // ── Selection ────────────────────────────────
     selectedIds: [],
@@ -185,7 +186,20 @@ lightPreset: template.lightPreset || 'midday',
   },
 
   updateRoom: (updates) => set((state) => ({ room: { ...state.room, ...updates } })),
-
+  resetToLocalDraft: () => set((state) => ({
+    currentTemplate: 'local-draft',
+    furniture: [],
+    structures: [],
+    windows: [],
+    doors: [],
+    selectedIds: [],
+    selectedWindowId: null,
+    history: [],
+    future: [],
+    lastSavedState: [],
+    room: { ...state.room, width: 6, depth: 5, height: 2.7, wallThickness: 0.2 },
+  })),
+  
   createCustomRoom: (name) => {
     const trimmedName = String(name || '').trim();
     if (!trimmedName) return null;

@@ -5,11 +5,11 @@ export default function HeroOverlay() {
   return (
     <div className="overlay-inner hero-inner">
       <div className="max-w-hero">
-        <div className="eyebrow">INTELLIGENT 3D INTERIOR DESIGN</div>
+        <div className="hero-kicker"><span className="hero-kicker-line" /> INTELLIGENT 3D INTERIOR DESIGN <span>01 / 08</span></div>
         <h1 className="headline-xl">
-          Your Space.
+          Make room
           <br />
-          Reimagined.
+          for <em>possibility.</em>
         </h1>
         <p className="body-text max-w-md">
           Design your space in 3D, customize every detail, and discover intelligent

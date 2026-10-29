@@ -1,12 +1,13 @@
 const DEFAULT_API_BASE_URL = 'https://backend-intellispace.onrender.com'
 const SESSION_KEY = 'intellispace.session'
+const SESSION_TTL_MS = 15 * 24 * 60 * 60 * 1000
 
 const configuredApiBaseUrl = import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL
 export const API_BASE_URL = (import.meta.env.DEV && !import.meta.env.VITE_API_BASE_URL ? '' : configuredApiBaseUrl).replace(/\/+$/, '')
 
 function readSession() {
   try {
-    const value = sessionStorage.getItem(SESSION_KEY)
+    const value = localStorage.getItem(SESSION_KEY) || sessionStorage.getItem(SESSION_KEY)
     return value ? JSON.parse(value) : null
   } catch {
     return null
@@ -18,11 +19,16 @@ export function getSession() {
 }
 
 export function setSession(session) {
-  sessionStorage.setItem(SESSION_KEY, JSON.stringify({ userId: session.userId, token: session.token }))
+  const expiresAt = session.expiresAt || session.expires_at || (session.expiresIn ? Date.now() + Number(session.expiresIn) * 1000 : Date.now() + SESSION_TTL_MS)
+  const persistedSession = { userId: session.userId, token: session.token, expiresAt }
+  localStorage.setItem(SESSION_KEY, JSON.stringify(persistedSession))
+  sessionStorage.removeItem(SESSION_KEY)
 }
 
 export function clearSession() {
+  localStorage.removeItem(SESSION_KEY)
   sessionStorage.removeItem(SESSION_KEY)
+  window.dispatchEvent(new CustomEvent('intellispace:session-ended'))
 }
 
 async function parseResponse(response) {

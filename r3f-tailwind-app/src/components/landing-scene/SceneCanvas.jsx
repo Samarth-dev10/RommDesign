@@ -11,7 +11,8 @@ export default function SceneCanvas() {
   return (
     <Canvas
       shadows
-      dpr={[1, 1.75]}
+      dpr={[1, 1.35]}
+      performance={{ min: 0.65, max: 1, debounce: 180 }}
       gl={{ antialias: true, powerPreference: 'high-performance' }}
       camera={{ fov: 42, near: 0.1, far: 60, position: [0, 1.6, 9] }}
     >
